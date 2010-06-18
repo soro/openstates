@@ -224,6 +224,8 @@ if __name__ == '__main__':
     old_bills_coll = args.state + '.bills.old'
 
     if new_bills_coll in db.collection_names():
+        if old_bills_coll in db.collection_names():
+            db.drop_collection(old_bills_coll)
         db[new_bills_coll].rename(old_bills_coll)
 
     bills_path = os.path.join(data_dir, args.state, 'bills', '*.json')
