@@ -2,6 +2,8 @@
 import glob
 import datetime
 
+from fiftystates.backend.utils import timestamp_to_dt
+
 import nltk
 import name_tools
 from nimsp import nimsp, NimspApiError
@@ -163,6 +165,28 @@ class LegislatorIDValidator(ConditionalFilter):
         return True
 
 
+class DateFixer(Filter):
+    def process_record(self, record):
+        for source in record.get('sources', []):
+            source['retrieved'] = timestamp_to_dt(source['retrieved'])
+
+        for action in record.get('actions', []):
+            action['date'] = timestamp_to_dt(action['date'])
+
+        for role in record.get('roles', []):
+            if role['start_date']:
+                role['start_date'] = timestamp_to_dt(role['start_date'])
+
+            if role['end_date']:
+                role['end_date'] = timestamp_to_dt(role['end_date'])
+
+        for vote in record.get('votes', []):
+            vote['date'] = timestamp_to_dt(vote['date'])
+
+        if 'date' in record:
+            record['date'] = timestamp_to_dt(record['date'])
+
+
 if __name__ == '__main__':
     import os
     import argparse
@@ -186,6 +210,7 @@ if __name__ == '__main__':
     run_recipe(JSONSource(metadata_path),
 
                FieldCopier({'_id': 'abbreviation'}),
+               DateFixer(),
 
                MongoDBEmitter('fiftystates', 'metadata.temp'),
                )
@@ -197,6 +222,7 @@ if __name__ == '__main__':
                UniqueIDValidator('state', 'session', 'chamber', 'bill_id'),
                Keywordize('title', '_keywords'),
                UnicodeFilter(),
+               DateFixer(),
 
                DebugEmitter(),
                MongoDBEmitter('fiftystates', 'tx.temp.bills'),
@@ -212,6 +238,7 @@ if __name__ == '__main__':
                LinkNIMSP(),
                LinkVotesmart(args.state),
                LegislatorIDValidator(),
+               DateFixer(),
 
                DebugEmitter(),
                MongoDBEmitter('fiftystates', args.state + '.temp.legislators',
