@@ -14,27 +14,6 @@ base_arg_parser.add_argument('state', type=str,
                                    'state to import'))
 
 
-def keywordize(str):
-    """
-    Splits a string into words, removes common stopwords, stems and removes
-    duplicates.
-    """
-    sents = nltk.tokenize.sent_tokenize(str)
-
-    words = []
-    for sent in sents:
-        words.extend(nltk.tokenize.word_tokenize(sent))
-
-    stemmer = nltk.stem.porter.PorterStemmer()
-    stop_words = nltk.corpus.stopwords.words()
-    words = [stemmer.stem(word.lower()) for word in words if
-             (word.isalpha() or word.isdigit()) and
-             word.lower() not in stop_words]
-    words = set(words)
-
-    return words
-
-
 def insert_with_id(obj):
     """
     Generates a unique ID for the supplied legislator/committee/bill
