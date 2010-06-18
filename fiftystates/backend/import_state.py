@@ -225,7 +225,7 @@ if __name__ == '__main__':
                DateFixer(),
 
                DebugEmitter(),
-               MongoDBEmitter('fiftystates', 'tx.temp.bills'),
+               MongoDBEmitter('fiftystates', args.state + '.temp.bills'),
                )
 
     legislators_path = os.path.join(data_dir, args.state, 'legislators',
