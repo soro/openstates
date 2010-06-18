@@ -186,10 +186,13 @@ class DateFixer(Filter):
         if 'date' in record:
             record['date'] = timestamp_to_dt(record['date'])
 
+        return record
+
 
 if __name__ == '__main__':
     import os
     import argparse
+    import pymongo
     from fiftystates import settings
     from fiftystates.backend.utils import base_arg_parser
 
@@ -205,6 +208,8 @@ if __name__ == '__main__':
     else:
         data_dir = settings.FIFTYSTATES_DATA_DIR
 
+    db = pymongo.Connection().fiftystates
+
     metadata_path = os.path.join(data_dir, args.state, 'state_metadata.json')
 
     run_recipe(JSONSource(metadata_path),
@@ -214,6 +219,12 @@ if __name__ == '__main__':
 
                MongoDBEmitter('fiftystates', 'metadata.temp'),
                )
+
+    new_bills_coll = args.state + '.bills.current'
+    old_bills_coll = args.state + '.bills.old'
+
+    if new_bills_coll in db.collection_names():
+        db[new_bills_coll].rename(old_bills_coll)
 
     bills_path = os.path.join(data_dir, args.state, 'bills', '*.json')
 
@@ -225,8 +236,9 @@ if __name__ == '__main__':
                DateFixer(),
 
                DebugEmitter(),
-               MongoDBEmitter('fiftystates', args.state + '.temp.bills'),
+               MongoDBEmitter('fiftystates', new_bills_coll),
                )
+
 
     legislators_path = os.path.join(data_dir, args.state, 'legislators',
                                     '*.json')
