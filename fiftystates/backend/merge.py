@@ -47,11 +47,13 @@ def merge_state(state):
             old_updated_at = old_bill.pop('updated_at')
             old_created_at = old_bill.pop('created_at')
             old_id = old_bill.pop('_id')
-            
+
+            update_live = True
             if bill != old_bill:
                 bill['updated_at'] = datetime.datetime.now()
                 bill['created_at'] = old_created_at
             else:
+                update_live = False
                 bill['updated_at'] = old_updated_at
                 bill['created_at'] = old_created_at
 
@@ -60,8 +62,10 @@ def merge_state(state):
             db[old_bills_coll].remove({'_id': old_id})
             db[new_bills_coll].remove({'_id': id})
 
-            print "Updating %s" % bill['_id']
-            db[live_bills_coll].save(bill)
+            if update_live:
+                print "Updating %s" % bill['_id']
+                db[live_bills_coll].save(bill)
+
             db[new_bills_coll].save(bill)
 
     for old_bill in db[old_bills_coll].find({'_type': 'bill'}):
