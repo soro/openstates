@@ -1,3 +1,4 @@
+import sys
 import logging
 
 from fiftystates.backend import db
@@ -29,7 +30,8 @@ class MongoHandler(logging.Handler):
                               'msecs': record.msecs,
                               'exc_text': record.exc_text or None,
                               'exc_info': record.exc_info or None,
-                              'message': record.getMessage()})
+                              'message': record.getMessage(),
+                              'argv': sys.argv})
 
 
 def init_mongo_logging(collection_name='log'):
