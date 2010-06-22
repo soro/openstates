@@ -13,8 +13,12 @@ def merge_state(state):
     if new_bills_coll not in db.collection_names():
         print "No scraper output, exiting."
         return
-    
+
     if old_bills_coll not in db.collection_names():
+        # If we have scraper output but no bills.old collection then this
+        # must be an initial import of a session so we can just copy
+        # everything over directly to the live data (after adding
+        # appropriate updated_at and created_at fields).
         print "Copying bills from %s to %s" % (new_bills_coll, live_bills_coll)
         for bill in db[new_bills_coll].find({'_type': 'bill'}):
             bill['updated_at'] = datetime.datetime.now()
@@ -33,11 +37,16 @@ def merge_state(state):
                                                 'bill_id': bill['bill_id']})
 
         if not old_bill:
+            # If a bill with corresponding state/session/chamber/bill_id
+            # is not in the bills.old collection then it must have been
+            # added since the last scraper run.
             bill['created_at'] = datetime.datetime.now()
             bill['updated_at'] = bill['created_at']
-            del bill['_id']
+            id = bill.pop('_id')
             print "New bill %s" % bill['bill_id']
-            insert_with_id(bill)
+            bill['_id'] = insert_with_id(bill)
+            db[new_bills_coll].remove({'_id': id})
+            db[new_bills_coll].save(bill)
         else:
             # We have to remove the 'updated_at' and 'created_at' and
             # 'id' fields of each object or they will always be different
@@ -58,7 +67,7 @@ def merge_state(state):
                 bill['created_at'] = old_created_at
 
             bill['_id'] = old_id
-            
+
             db[old_bills_coll].remove({'_id': old_id})
             db[new_bills_coll].remove({'_id': id})
 
@@ -78,8 +87,8 @@ def merge_state(state):
     if old_bills_coll in db.collection_names():
         db.drop_collection(old_bills_coll)
     db[new_bills_coll].rename(old_bills_coll)
-        
-    
+
+
 if __name__ == '__main__':
     import os
     import argparse
