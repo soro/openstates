@@ -14,7 +14,7 @@ from saucebrush import run_recipe
 from saucebrush.filters import (Filter, ConditionalFilter, UnicodeFilter,
                                 UniqueIDValidator, FieldCopier)
 from saucebrush.sources import JSONSource
-from saucebrush.emitters import DebugEmitter, MongoDBEmitter
+from saucebrush.emitters import DebugEmitter, MongoDBEmitter, LoggingEmitter
 
 
 class Keywordize(Filter):
@@ -207,6 +207,7 @@ if __name__ == '__main__':
     import os
     import argparse
     import pymongo
+    import logging
     from fiftystates import settings
     from fiftystates.backend.utils import base_arg_parser
 
@@ -224,6 +225,9 @@ if __name__ == '__main__':
 
     db = pymongo.Connection().fiftystates
 
+    logging.basicConfig(level=logging.DEBUG)
+    logger = logging.getLogger('fiftystates')
+
     metadata_path = os.path.join(data_dir, args.state, 'state_metadata.json')
 
     run_recipe(JSONSource(metadata_path),
@@ -231,6 +235,7 @@ if __name__ == '__main__':
                FieldCopier({'_id': 'abbreviation'}),
                DateFixer(),
 
+               LoggingEmitter(logger, "Importing metadata for %(_id)s"),
                MongoDBEmitter('fiftystates', 'metadata.temp'),
                )
 
@@ -246,6 +251,8 @@ if __name__ == '__main__':
                DateFixer(),
 
 #               DebugEmitter(),
+
+               LoggingEmitter(logger, "Importing bill %(bill_id)s"),
                MongoDBEmitter('fiftystates', "%s.bills.current" % args.state),
                )
 
@@ -263,7 +270,7 @@ if __name__ == '__main__':
                LegislatorIDValidator(),
                DateFixer(),
 
-#               DebugEmitter(),
+               LoggingEmitter(logger, "Importing legislator %(full_name)s"),
                MongoDBEmitter('fiftystates',
                               "%s.legislators.current" % args.state),
                )
