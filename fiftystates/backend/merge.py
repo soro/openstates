@@ -6,6 +6,37 @@ from fiftystates.backend.utils import insert_with_id
 
 
 def merge_state(state):
+    merge_metadata(state)
+    merge_bills(state)
+    merge_legislators(state)
+
+
+def merge_metadata(state):
+    metadata = db.metadata.temp.find_one({'_id': state})
+    if not metadata:
+        return
+
+    live_metadata = db.metadata.find_one({'_id': state})
+    if live_metadata:
+        live_updated_at = live_metadata.pop('updated_at',
+                                            datetime.datetime.now())
+        live_created_at = live_metadata.pop('created_at',
+                                            datetime.datetime.now())
+
+        if metadata != live_metadata:
+            metadata['updated_at'] = datetime.datetime.now()
+        else:
+            metadata['updated_at'] = live_updated_at
+
+        metadata['created_at'] = live_created_at
+    else:
+        metadata['updated_at'] = datetime.datetime.now()
+        metadata['created_at'] = metadata['updated_at']
+
+    db.metadata.save(metadata)
+
+
+def merge_bills(state):
     new_bills_coll = args.state + '.bills.current'
     old_bills_coll = args.state + '.bills.old'
     live_bills_coll = args.state + '.bills'
@@ -88,6 +119,9 @@ def merge_state(state):
         db.drop_collection(old_bills_coll)
     db[new_bills_coll].rename(old_bills_coll)
 
+
+def merge_legislators(state):
+    pass
 
 if __name__ == '__main__':
     import os
