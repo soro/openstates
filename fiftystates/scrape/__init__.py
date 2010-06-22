@@ -78,6 +78,8 @@ class Scraper(scrapelib.Scraper):
 
         self.follow_robots = False
 
+        self.use_mongo = kwargs.get('use_mongo', False)
+
         # logging convenience methods
         self.logger = logging.getLogger("fiftystates")
         self.log = self.logger.info

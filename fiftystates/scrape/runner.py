@@ -54,6 +54,7 @@ def run(state, years, chambers, output_dir, options):
     opts = {'output_dir': output_dir,
             'no_cache': options.no_cache,
             'requests_per_minute': options.rpm,
+            'use_mongo': options.use_mongo,
             # cache_dir, error_dir
         }
 
@@ -136,6 +137,9 @@ def main():
                     help="don't use web page cache"),
         make_option('-r', '--rpm', action='store', type="int", dest='rpm',
                     default=60),
+        make_option('-m', '--use_mongo', action='store_true', dest='use_mongo',
+                    default=False, help='store output in a MongoDB collection'),
+
     )
 
     parser = OptionParser(option_list=option_list)

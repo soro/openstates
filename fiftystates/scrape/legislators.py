@@ -52,14 +52,18 @@ class LegislatorScraper(Scraper):
         role = legislator['roles'][0]
         legislator['state'] = self.state
 
-        filename = "%s_%s_%s_%s.json" % (role['session'],
-                                         role['chamber'],
-                                         role['district'],
-                                         legislator['full_name'])
-        filename = filename.encode('ascii', 'replace')
-        with open(os.path.join(self.output_dir, "legislators", filename),
-                  'w') as f:
-            json.dump(legislator, f, cls=JSONDateEncoder)
+        if self.use_mongo:
+            from fiftystates.backend import db
+            db["%s.legislators.scraped" % self.state].save(legislator)
+        else:
+            filename = "%s_%s_%s_%s.json" % (role['session'],
+                                             role['chamber'],
+                                             role['district'],
+                                             legislator['full_name'])
+            filename = filename.encode('ascii', 'replace')
+            with open(os.path.join(self.output_dir, "legislators", filename),
+                      'w') as f:
+                json.dump(legislator, f, cls=JSONDateEncoder)
 
 
 class Person(FiftystatesObject):

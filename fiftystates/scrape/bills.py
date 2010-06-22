@@ -30,11 +30,16 @@ class BillScraper(Scraper):
 
         bill['state'] = self.state
 
-        filename = "%s_%s_%s.json" % (bill['session'], bill['chamber'],
-                                      bill['bill_id'])
-        filename = filename.encode('ascii', 'replace')
-        with open(os.path.join(self.output_dir, "bills", filename), 'w') as f:
-            json.dump(bill, f, cls=JSONDateEncoder)
+        if self.use_mongo:
+            from fiftystates.backend import db
+            db["%s.bills.scraped" % self.state].save(bill)
+        else:
+            filename = "%s_%s_%s.json" % (bill['session'], bill['chamber'],
+                                          bill['bill_id'])
+            filename = filename.encode('ascii', 'replace')
+            with open(os.path.join(self.output_dir, "bills", filename),
+                      'w') as f:
+                json.dump(bill, f, cls=JSONDateEncoder)
 
 
 class Bill(FiftystatesObject):

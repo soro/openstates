@@ -20,15 +20,19 @@ class VoteScraper(Scraper):
                                                            vote['bill_id'],
                                                            vote['motion']))
 
-        path = os.path.join(self.output_dir, 'votes', filename)
-        try:
-            with open(path, 'w') as f:
-                json.dump(vote, f, cls=JSONDateEncoder)
-        except IOError as e:
-            if e.errno == 2:
-                os.makedirs(os.path.join(self.output_dir, 'votes'))
+        if self.use_mongo:
+            from fiftystates.backend import db
+            db["%s.votes.scraped" % self.state].save(vote)
+        else:
+            path = os.path.join(self.output_dir, 'votes', filename)
+            try:
                 with open(path, 'w') as f:
                     json.dump(vote, f, cls=JSONDateEncoder)
+            except IOError as e:
+                if e.errno == 2:
+                    os.makedirs(os.path.join(self.output_dir, 'votes'))
+                    with open(path, 'w') as f:
+                        json.dump(vote, f, cls=JSONDateEncoder)
 
 
 class Vote(FiftystatesObject):

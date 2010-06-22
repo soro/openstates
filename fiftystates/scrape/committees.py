@@ -21,12 +21,16 @@ class CommitteeScraper(Scraper):
         """
         self.log("save_committeee: %s" % committee['name'])
 
-        filename = "%s_%s.json" % (committee['chamber'],
-                                   committee['name'].replace('/', ','))
+        if self.use_mongo:
+            from fiftystates.backend import db
+            db["%s.committees.scraped" % self.state].save(committee)
+        else:
+            filename = "%s_%s.json" % (committee['chamber'],
+                                       committee['name'].replace('/', ','))
 
-        with open(os.path.join(self.output_dir, "committees", filename),
-                  'w') as f:
-            json.dump(committee, f, cls=JSONDateEncoder)
+            with open(os.path.join(self.output_dir, "committees", filename),
+                      'w') as f:
+                json.dump(committee, f, cls=JSONDateEncoder)
 
 
 class Committee(FiftystatesObject):
