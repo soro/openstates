@@ -35,7 +35,7 @@ class Keywordize(Filter):
                         (word.isalpha() or word.isdigit()) and
                         word.lower() not in self._stop_words])
 
-        record[self._new_field] = list(keywords)
+        record[self._new_field] = sorted(list(keywords))
 
         return record
 
