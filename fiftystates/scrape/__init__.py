@@ -79,6 +79,9 @@ class Scraper(scrapelib.Scraper):
         self.follow_robots = False
 
         self.use_mongo = kwargs.get('use_mongo', False)
+        if self.use_mongo:
+            from fiftystates.backend.logs import init_mongo_logging
+            init_mongo_logging()
 
         # logging convenience methods
         self.logger = logging.getLogger("fiftystates")
