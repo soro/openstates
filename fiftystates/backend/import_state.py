@@ -124,8 +124,11 @@ class LinkVotesmart(Filter):
         self._officials = {}
 
         for chamber, office in dict(upper=9, lower=8).items():
-            self._officials[chamber] = votesmart.officials.getByOfficeState(
-                office, state.upper())
+            try:
+                self._officials[chamber] = votesmart.officials.getByOfficeState(
+                    office, state.upper())
+            except VotesmartApiError:
+                self._officials[chamber] = []
 
     def process_record(self, record):
         role = record['roles'][0]
