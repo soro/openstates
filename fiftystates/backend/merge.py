@@ -84,8 +84,10 @@ def merge_bills(state):
             updated_at = bill.pop('updated_at', None)
             created_at = bill.pop('created_at', None)
             id = bill.pop('_id')
-            old_updated_at = old_bill.pop('updated_at')
-            old_created_at = old_bill.pop('created_at')
+            old_updated_at = old_bill.pop('updated_at',
+                                          datetime.datetime.now())
+            old_created_at = old_bill.pop('created_at',
+                                          datetime.datetime.now())
             old_id = old_bill.pop('_id')
 
             update_live = True
@@ -121,7 +123,104 @@ def merge_bills(state):
 
 
 def merge_legislators(state):
-    pass
+    legs_coll = state + ".legislators"
+    old_legs_coll = legs_coll + ".old"
+    new_legs_coll = legs_coll + ".current"
+
+    if not new_legs_coll in db.collection_names():
+        print "No scraped legislator data, exiting."
+        return
+
+    # We'll use the state metadata to calculate adjacent sessions
+    metadata = db.metadata.find_one({'_id': state})
+    if not metadata:
+        print "Couldn't find state metadata for %s, exiting" % state
+        return
+
+    for legislator in db[new_legs_coll].find({'_type': 'person'}):
+        active_role = legislator['roles'][0]
+
+        leg_query = {
+            'first_name': legislator['first_name'],
+            'last_name': legislator['last_name'],
+            'roles': {'$elemMatch': {'state': active_role['state'],
+                                     'session': active_role['session'],
+                                     'chamber': active_role['chamber'],
+                                     'district': active_role['district']}},
+            }
+
+        old_legislator = db[old_legs_coll].find_one(leg_query)
+
+        if old_legislator:
+            updated_at = legislator.pop('updated_at', datetime.datetime.now())
+            created_at = legislator.pop('created_at', datetime.datetime.now())
+            id = legislator.pop('_id')
+            old_updated_at = old_legislator.pop('updated_at',
+                                                datetime.datetime.now())
+            old_created_at = old_legislator.pop('created_at',
+                                                datetime.datetime.now())
+            old_id = old_legislator.pop('_id')
+
+            if legislator != old_legislator:
+                legislator['updated_at'] = datetime.datetime.now()
+                legislator['created_at'] = old_created_at
+                legislator['_id'] = old_id
+            else:
+                legislator['updated_at'] = old_updated_at
+                legislator['created_at'] = old_created_at
+
+            db[new_legs_coll].remove({'_id': id})
+            #db[new_legs_coll].save(legislator)
+            db[old_legs_coll].remove({'_id': old_id})
+        else:
+            legislator['updated_at'] = datetime.datetime.now()
+            legislator['created_at'] = legislator['updated_at']
+
+        # Now that we've merged between the old and new scraping runs we need
+        # to actually merge into the live data. This is much more complicated
+        # than with bills because legislator objects are cross-session
+        live_legislator = db[legs_coll].find_one(leg_query)
+
+        if not live_legislator:
+            # No exact match in live. Look for close matches to merge.
+            sessions = [s['name'] for s in metadata['sessions']]
+            s_index = sessions.index(active_role['session'])
+            if s_index > 0:
+                prev_session = sessions[s_index - 1]
+                leg_query['roles']['$elemMatch']['session'] = prev_session
+                live_legislator = db[legs_coll].find_one(leg_query)
+            if not live_legislator and s_index + 1 < len(sessions):
+                next_session = sessions[s_index + 1]
+                leg_query['roles']['$elemMatch']['session'] = next_session
+                live_legislator = db[legs_coll].find_one(leg_query)
+
+        if live_legislator:
+            # Merge
+            # We pull over roles from different sessions but wipe out
+            # roles from the scraped session
+            scraped_role_sessions = set([r['session']
+                                         for r in legislator['roles']])
+
+            roles = list(legislator['roles'])
+            legislator['roles'].extend([
+                    r for r in live_legislator['roles']
+                    if r['session'] not in scraped_role_session])
+            legislator['_id'] = live_legislator['_id']
+            db[legs_coll].save(legislator)
+        else:
+            # New legislator
+            legislator['_id'] = insert_with_id(legislator)
+
+        db[new_legs_coll].save(legislator)
+
+    for old_legislator in db[old_legs_coll].find({'_type': 'person'}):
+        # Removed legislator
+        # TODO: add deleted flag to live legislator
+        print "Deleted legislator %s" % old_legislator['full_name']
+
+    if old_legs_coll in db.collection_names():
+        db.drop_collection(old_legs_coll)
+    db[new_legs_coll].rename(old_legs_coll)
 
 if __name__ == '__main__':
     import os
