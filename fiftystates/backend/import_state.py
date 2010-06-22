@@ -245,10 +245,11 @@ if __name__ == '__main__':
                UnicodeFilter(),
                DateFixer(),
 
-               DebugEmitter(),
+#               DebugEmitter(),
                MongoDBEmitter('fiftystates', "%s.bills.current" % args.state),
                )
 
+    rotate_collections(args.state + '.legislators')
 
     legislators_path = os.path.join(data_dir, args.state, 'legislators',
                                     '*.json')
@@ -257,12 +258,12 @@ if __name__ == '__main__':
 
                SplitName(),
                AppendStateToRoles(args.state),
-               LinkNIMSP(),
-               LinkVotesmart(args.state),
+ #              LinkNIMSP(),
+ #              LinkVotesmart(args.state),
                LegislatorIDValidator(),
                DateFixer(),
 
-               DebugEmitter(),
-               MongoDBEmitter('fiftystates', args.state + '.temp.legislators',
-                              drop_collection=True),
+#               DebugEmitter(),
+               MongoDBEmitter('fiftystates',
+                              "%s.legislators.current" % args.state),
                )
