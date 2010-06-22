@@ -2,6 +2,7 @@
 import glob
 import datetime
 
+from fiftystates.backend import db
 from fiftystates.backend.utils import timestamp_to_dt
 
 import nltk
@@ -192,6 +193,16 @@ class DateFixer(Filter):
         return record
 
 
+def rotate_collections(base_name):
+    new_coll = base_name + ".current"
+    old_coll = base_name + ".old"
+
+    if new_coll in db.collection_names():
+        if old_coll in db.collection_names():
+            db.drop_collection(old_coll)
+        db[new_coll].rename(old_coll)
+
+
 if __name__ == '__main__':
     import os
     import argparse
@@ -223,13 +234,7 @@ if __name__ == '__main__':
                MongoDBEmitter('fiftystates', 'metadata.temp'),
                )
 
-    new_bills_coll = args.state + '.bills.current'
-    old_bills_coll = args.state + '.bills.old'
-
-    if new_bills_coll in db.collection_names():
-        if old_bills_coll in db.collection_names():
-            db.drop_collection(old_bills_coll)
-        db[new_bills_coll].rename(old_bills_coll)
+    rotate_collections(args.state + '.bills')
 
     bills_path = os.path.join(data_dir, args.state, 'bills', '*.json')
 
@@ -241,7 +246,7 @@ if __name__ == '__main__':
                DateFixer(),
 
                DebugEmitter(),
-               MongoDBEmitter('fiftystates', new_bills_coll),
+               MongoDBEmitter('fiftystates', "%s.bills.current" % args.state),
                )
 
 
