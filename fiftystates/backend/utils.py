@@ -29,7 +29,7 @@ def insert_with_id(obj):
         collection = db.committees
         id_type = 'C'
     elif obj['_type'] == 'bill':
-        collection = db.bills
+        collection = db["%s.bills" % obj['state']]
         id_type = 'B'
 
     id_reg = re.compile('^%s%s' % (obj['state'].upper(), id_type))
@@ -54,6 +54,7 @@ def insert_with_id(obj):
 
         try:
             collection.insert(obj, safe=True)
+            return obj['_id']
             break
         except pymongo.DuplicateKeyError:
             continue
