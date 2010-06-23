@@ -4,9 +4,6 @@ import logging
 from fiftystates.backend import db
 from fiftystates.backend.utils import timestamp_to_dt
 
-from mongolog.handlers import MongoHandler
-from mongolog.logger import MongoLogger
-
 _initialized = False
 
 
