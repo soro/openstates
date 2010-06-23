@@ -13,7 +13,7 @@ from votesmart import votesmart, VotesmartApiError
 from saucebrush import run_recipe
 from saucebrush.filters import (Filter, ConditionalFilter, UnicodeFilter,
                                 UniqueIDValidator, FieldCopier)
-from saucebrush.sources import JSONSource
+from saucebrush.sources import JSONSource, MongoDBSource
 from saucebrush.emitters import DebugEmitter, MongoDBEmitter, LoggingEmitter
 
 
@@ -209,6 +209,7 @@ if __name__ == '__main__':
     import pymongo
     import logging
     from fiftystates import settings
+    from fiftystates.backend.logs import init_mongo_logging
     from fiftystates.backend.utils import base_arg_parser
 
     parser = argparse.ArgumentParser(parents=[base_arg_parser])
@@ -225,8 +226,9 @@ if __name__ == '__main__':
 
     db = pymongo.Connection().fiftystates
 
-    logging.basicConfig(level=logging.DEBUG)
+    init_mongo_logging()
     logger = logging.getLogger('fiftystates')
+    logger.addHandler(logging.StreamHandler())
 
     metadata_path = os.path.join(data_dir, args.state, 'state_metadata.json')
 
@@ -249,8 +251,6 @@ if __name__ == '__main__':
                Keywordize('title', '_keywords'),
                UnicodeFilter(),
                DateFixer(),
-
-#               DebugEmitter(),
 
                LoggingEmitter(logger, "Importing bill %(bill_id)s"),
                MongoDBEmitter('fiftystates', "%s.bills.current" % args.state),
