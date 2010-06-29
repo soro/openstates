@@ -6,10 +6,11 @@ from fiftystates.backend import db
 from saucebrush import run_recipe
 from saucebrush.sources import JSONSource, MongoDBSource
 from saucebrush.emitters import DebugEmitter, MongoDBEmitter, LoggingEmitter
-from saucebrush.filters import UnicodeFilter, UniqueIDValidator, FieldCopier
+from saucebrush.filters import (UnicodeFilter, UniqueIDValidator, FieldCopier,
+                                SubrecordFilter, FieldAdder)
 
-from fiftystates.backend.filters import (Keywordize, SplitName, DateFixer,
-                                         AppendStateToRoles, LinkNIMSP,
+from fiftystates.backend.filters import (Keywordize, SplitName,
+                                         LinkNIMSP, TimestampToDatetime,
                                          LinkVotesmart,
                                          LegislatorIDValidator)
 
@@ -56,7 +57,6 @@ if __name__ == '__main__':
     run_recipe(JSONSource(metadata_path),
 
                FieldCopier({'_id': 'abbreviation'}),
-               DateFixer(),
 
                LoggingEmitter(logger, "Importing metadata for %(_id)s"),
                MongoDBEmitter('fiftystates', 'metadata.temp'),
@@ -71,7 +71,10 @@ if __name__ == '__main__':
                UniqueIDValidator('state', 'session', 'chamber', 'bill_id'),
                Keywordize('title', '_keywords'),
                UnicodeFilter(),
-               DateFixer(),
+
+               SubrecordFilter('sources', TimestampToDatetime('retrieved')),
+               SubrecordFilter('actions', TimestampToDatetime('date')),
+               SubrecordFilter('votes', TimestampToDatetime('date')),
 
                LoggingEmitter(logger, "Importing bill %(bill_id)s"),
                MongoDBEmitter('fiftystates', "%s.bills.current" % args.state),
@@ -85,11 +88,15 @@ if __name__ == '__main__':
     run_recipe(JSONSource(glob.iglob(legislators_path)),
 
                SplitName(),
-               AppendStateToRoles(args.state),
+
+               SubrecordFilter('roles', FieldAdder('state', args.state)),
+               SubrecordFilter('roles', TimestampToDatetime('start_date')),
+               SubrecordFilter('roles', TimestampToDatetime('end_date')),
+
  #              LinkNIMSP(),
  #              LinkVotesmart(args.state),
                LegislatorIDValidator(),
-               DateFixer(),
+
 
                LoggingEmitter(logger, "Importing legislator %(full_name)s"),
                MongoDBEmitter('fiftystates',

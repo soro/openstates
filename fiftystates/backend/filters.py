@@ -6,7 +6,7 @@ from fiftystates.backend.utils import timestamp_to_dt
 from nimsp import nimsp, NimspApiError
 from votesmart import votesmart, VotesmartApiError
 
-from saucebrush.filters import Filter, ConditionalFilter
+from saucebrush.filters import Filter, ConditionalFilter, FieldFilter
 
 
 class Keywordize(Filter):
@@ -52,16 +52,6 @@ class SplitName(Filter):
         (record['prefixes'], record['first_name'],
          record['last_name'], record['suffixes']) = name_tools.split(full_name)
 
-        return record
-
-
-class AppendStateToRoles(Filter):
-    def __init__(self, state):
-        self.state = state
-
-    def process_record(self, record):
-        for role in record['roles']:
-            role['state'] = self.state
         return record
 
 
@@ -162,25 +152,6 @@ class LegislatorIDValidator(ConditionalFilter):
         return True
 
 
-class DateFixer(Filter):
-    def process_record(self, record):
-        for source in record.get('sources', []):
-            source['retrieved'] = timestamp_to_dt(source['retrieved'])
-
-        for action in record.get('actions', []):
-            action['date'] = timestamp_to_dt(action['date'])
-
-        for role in record.get('roles', []):
-            if role['start_date']:
-                role['start_date'] = timestamp_to_dt(role['start_date'])
-
-            if role['end_date']:
-                role['end_date'] = timestamp_to_dt(role['end_date'])
-
-        for vote in record.get('votes', []):
-            vote['date'] = timestamp_to_dt(vote['date'])
-
-        if 'date' in record:
-            record['date'] = timestamp_to_dt(record['date'])
-
-        return record
+class TimestampToDatetime(FieldFilter):
+    def process_field(self, item):
+        return timestamp_to_dt(item)
