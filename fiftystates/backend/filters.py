@@ -1,6 +1,7 @@
 import nltk
 import name_tools
 
+from fiftystates import settings
 from fiftystates.backend.utils import timestamp_to_dt
 
 from nimsp import nimsp, NimspApiError
@@ -155,3 +156,13 @@ class LegislatorIDValidator(ConditionalFilter):
 class TimestampToDatetime(FieldFilter):
     def process_field(self, item):
         return timestamp_to_dt(item)
+
+
+class RequireField(Filter):
+    def __init__(self, field):
+        super(RequireField, self).__init__()
+        self.field = field
+
+    def process_record(self, record):
+        if self.field not in record:
+            record[self.field] = None

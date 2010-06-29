@@ -11,7 +11,7 @@ from saucebrush.filters import (UnicodeFilter, UniqueIDValidator, FieldCopier,
 
 from fiftystates.backend.filters import (Keywordize, SplitName,
                                          LinkNIMSP, TimestampToDatetime,
-                                         LinkVotesmart,
+                                         LinkVotesmart, RequireField,
                                          LegislatorIDValidator)
 
 
@@ -93,10 +93,11 @@ if __name__ == '__main__':
                SubrecordFilter('roles', TimestampToDatetime('start_date')),
                SubrecordFilter('roles', TimestampToDatetime('end_date')),
 
- #              LinkNIMSP(),
- #              LinkVotesmart(args.state),
+               LinkNIMSP(),
+               RequireField('nimsp_candidate_id'),
+               LinkVotesmart(args.state),
+               RequireField('votesmart_id'),
                LegislatorIDValidator(),
-
 
                LoggingEmitter(logger, "Importing legislator %(full_name)s"),
                MongoDBEmitter('fiftystates',
