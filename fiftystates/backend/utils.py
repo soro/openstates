@@ -22,6 +22,16 @@ def get_class(name):
     return c
 
 
+def rotate_collections(base_name):
+    new_coll = base_name + ".current"
+    old_coll = base_name + ".old"
+
+    if new_coll in db.collection_names():
+        if old_coll in db.collection_names():
+            db.drop_collection(old_coll)
+        db[new_coll].rename(old_coll)
+
+
 def insert_with_id(obj):
     """
     Generates a unique ID for the supplied legislator/committee/bill

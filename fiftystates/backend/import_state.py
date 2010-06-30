@@ -15,16 +15,6 @@ from fiftystates.backend.filters import (Keywordize, SplitName,
                                          LegislatorIDValidator)
 
 
-def rotate_collections(base_name):
-    new_coll = base_name + ".current"
-    old_coll = base_name + ".old"
-
-    if new_coll in db.collection_names():
-        if old_coll in db.collection_names():
-            db.drop_collection(old_coll)
-        db[new_coll].rename(old_coll)
-
-
 if __name__ == '__main__':
     import os
     import argparse
@@ -32,7 +22,7 @@ if __name__ == '__main__':
     import logging
     from fiftystates import settings
     from fiftystates.backend.logs import init_mongo_logging
-    from fiftystates.backend.utils import base_arg_parser
+    from fiftystates.backend.utils import base_arg_parser, rotate_collections
 
     parser = argparse.ArgumentParser(parents=[base_arg_parser])
 
