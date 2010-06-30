@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+import os
 import glob
 
 from fiftystates.backend import db
-from fiftystates.backend.utils import get_class
+from fiftystates.backend.logs import logger
+from fiftystates.backend.utils import rotate_collections, get_class
 
 from saucebrush import run_recipe, Recipe
 from saucebrush.sources import JSONSource, MongoDBSource
@@ -53,46 +55,22 @@ class FiftystatesRecipe(object):
         recipe.run(self.source)
 
 
-if __name__ == '__main__':
-    import os
-    import argparse
-    import pymongo
-    import logging
-    from fiftystates import settings
-    from fiftystates.backend.logs import init_mongo_logging
-    from fiftystates.backend.utils import base_arg_parser, rotate_collections
-
-    parser = argparse.ArgumentParser(parents=[base_arg_parser])
-
-    parser.add_argument('--data_dir', '-d', type=str,
-                        help='the base Fifty State data directory')
-
-    args = parser.parse_args()
-
-    if args.data_dir:
-        data_dir = args.data_dir
-    else:
-        data_dir = settings.FIFTYSTATES_DATA_DIR
-
-    db = pymongo.Connection().fiftystates
-
-    init_mongo_logging()
-    logger = logging.getLogger('fiftystates')
-    logger.addHandler(logging.StreamHandler())
-
-    metadata_path = os.path.join(data_dir, args.state, 'state_metadata.json')
+def import_metadata(state, data_dir):
+    metadata_path = os.path.join(data_dir, state, 'state_metadata.json')
 
     run_recipe(JSONSource(metadata_path),
 
                FieldCopier({'_id': 'abbreviation'}),
 
                LoggingEmitter(logger, "Importing metadata for %(_id)s"),
-               MongoDBEmitter('fiftystates', 'metadata.temp'),
+               MongoDBEmitter(db, 'metadata.temp'),
                )
 
+
+def import_bills(state, data_dir):
     rotate_collections(args.state + '.bills')
 
-    bills_path = os.path.join(data_dir, args.state, 'bills', '*.json')
+    bills_path = os.path.join(data_dir, state, 'bills', '*.json')
 
     run_recipe(JSONSource(glob.iglob(bills_path)),
 
@@ -108,9 +86,11 @@ if __name__ == '__main__':
                MongoDBEmitter('fiftystates', "%s.bills.current" % args.state),
                )
 
+
+def import_legislators(state, data_dir):
     rotate_collections(args.state + '.legislators')
 
-    legislators_path = os.path.join(data_dir, args.state, 'legislators',
+    legislators_path = os.path.join(data_dir, state, 'legislators',
                                     '*.json')
 
     run_recipe(JSONSource(glob.iglob(legislators_path)),
@@ -131,3 +111,30 @@ if __name__ == '__main__':
                MongoDBEmitter('fiftystates',
                               "%s.legislators.current" % args.state),
                )
+
+
+if __name__ == '__main__':
+    import logging
+    import argparse
+    from fiftystates import settings
+    from fiftystates.backend.logs import init_mongo_logging
+    from fiftystates.backend.utils import base_arg_parser
+
+    parser = argparse.ArgumentParser(parents=[base_arg_parser])
+
+    parser.add_argument('--data_dir', '-d', type=str,
+                        help='the base Fifty State data directory')
+
+    args = parser.parse_args()
+
+    if args.data_dir:
+        data_dir = args.data_dir
+    else:
+        data_dir = settings.FIFTYSTATES_DATA_DIR
+
+    init_mongo_logging()
+    logger.addHandler(logging.StreamHandler())
+
+    import_metadata(args.state, data_dir)
+    import_legislators(args.state, data_dir)
+    import_bills(args.state, data_dir)

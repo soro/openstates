@@ -6,6 +6,8 @@ from fiftystates.backend.utils import timestamp_to_dt
 
 _initialized = False
 
+logger = logging.getLogger('fiftystates')
+
 
 class MongoHandler(logging.Handler):
     def __init__(self, collection, level=logging.NOTSET):
