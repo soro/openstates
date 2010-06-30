@@ -2,8 +2,9 @@
 import glob
 
 from fiftystates.backend import db
+from fiftystates.backend.utils import get_class
 
-from saucebrush import run_recipe
+from saucebrush import run_recipe, Recipe
 from saucebrush.sources import JSONSource, MongoDBSource
 from saucebrush.emitters import DebugEmitter, MongoDBEmitter, LoggingEmitter
 from saucebrush.filters import (UnicodeFilter, UniqueIDValidator, FieldCopier,
@@ -13,6 +14,43 @@ from fiftystates.backend.filters import (Keywordize, SplitName,
                                          LinkNIMSP, TimestampToDatetime,
                                          LinkVotesmart, RequireField,
                                          LegislatorIDValidator)
+
+
+class FiftystatesRecipe(object):
+    def __init__(self, state, stage, source, filters, emitters):
+        self.state = state
+        self.stage = stage
+        self.sources = source
+        self.filters = filters
+        self.db_filters = []
+        self.emitters = emitters
+
+    def pull_db_filters(self):
+
+        def instantiate(filter_spec):
+            return get_class(filter_spec['name'])(*filter_spec['args'],
+                                                   **filter_spec['kwargs'])
+
+        self.db_filters = []
+        doc = db.filters.find_one({'_id': self.state})
+        if doc:
+            for spec in doc.get('common', []):
+                self.db_filters.append(instantiate(spec))
+
+            for spec in doc.get(self.stage, []):
+                self.db_filters.append(instantiate(spec))
+
+    def run(self):
+        self.pull_db_filters()
+
+        filters = []
+        filters.append(self.filters)
+        filters.append(self.db_filters)
+        filters.append(self.emitters)
+
+        recipe = Recipe(*filters)
+
+        recipe.run(self.source)
 
 
 if __name__ == '__main__':
