@@ -166,3 +166,4 @@ class RequireField(Filter):
     def process_record(self, record):
         if self.field not in record:
             record[self.field] = None
+        return record
