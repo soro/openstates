@@ -14,6 +14,14 @@ base_arg_parser.add_argument('state', type=str,
                                    'state to import'))
 
 
+def get_class(name):
+    parts = name.split(".")
+    c = __import__(".".join(parts[:-1]))
+    for part in parts[1:]:
+        c = getattr(c, part)
+    return c
+
+
 def insert_with_id(obj):
     """
     Generates a unique ID for the supplied legislator/committee/bill
