@@ -82,6 +82,8 @@ class Legislator(FiftyStatesDocument):
             'roles': list,
             'created_at': datetime.datetime,
             'updated_at': datetime.datetime,
+            'votesmart_id': unicode,
+            'nimsp_candidate_id': int,
             }
 
     required_fields = ['full_name', 'first_name', 'last_name', 'middle_name',
