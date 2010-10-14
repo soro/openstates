@@ -214,7 +214,7 @@
    <field name="content_type" type="string" indexed="true" stored="true" multiValued="true"/>
 
    <!-- The extracted text of the version -->
-   <field name="text" type="text" indexed="true" stored="true" multiValued="true" termVectors="true" termPositions="true" termOffsets="true" />
+   <field name="text" type="text" indexed="true" stored="false" multiValued="true" termVectors="true" termPositions="true" termOffsets="true" />
 
    <!-- Default to "NOW" to represent indexed time -->
    <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
