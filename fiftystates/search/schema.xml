@@ -186,9 +186,12 @@
           required="true" />
    <field name="bill_id" type="text" indexed="true" stored="true"
           required="true" />
-   <field name="bill_title" type="text" indexed="true" stored="true" />
-   <field name="bill_created_at" type="text" indexed="false" stored="true" />
-   <field name="bill_updated_at" type="text" indexed="false" stored="true" />
+   <field name="title" type="text" indexed="true" stored="true" />
+   <field name="created_at" type="string" indexed="false" stored="true" />
+   <field name="updated_at" type="string" indexed="false" stored="true" />
+   <field name="type" type="string" indexed="true" stored="true"
+          multiValued="true" />
+   <copyField source="ignored_bill_title" dest="title" />
 
    <!-- Version metadata -->
    <field name="url" type="text" indexed="true" stored="true" />

@@ -29,20 +29,36 @@ def index_versions(state, solr_url="http://localhost:8983/solr/"):
 
             doc = fs.get(version['document_id'])
 
-            params = {}
-            params['literal.bill_id'] = doc.metadata['bill']['bill_id']
-            params['literal.state'] = doc.metadata['bill']['state']
-            params['literal.chamber'] = doc.metadata['bill']['chamber']
-            params['literal.bill_title'] = (
-                doc.metadata['bill']['title'].encode('ascii', 'replace'))
-            params['literal.document_name'] = doc.metadata['name']
-            params['literal.url'] = doc.metadata['url']
-            params['literal.id'] = version['document_id']
-            params['literal.bill_created_at'] = bill['created_at'].strftime(
-                DT_FORMAT)
-            params['literal.bill_updated_at'] = bill['updated_at'].strftime(
-                DT_FORMAT)
-            params['commit'] = 'false'
+            params = []
+            params.append(('literal.bill_id', doc.metadata['bill']['bill_id']))
+            params.append(('literal.state', doc.metadata['bill']['state']))
+            params.append(('literal.chamber', doc.metadata['bill']['chamber']))
+
+            params.append(('literal.document_name', doc.metadata['name']))
+            params.append(('literal.url', doc.metadata['url']))
+            params.append(('literal.id', version['document_id']))
+            params.append(('literal.created_at',
+                           bill['created_at'].strftime(DT_FORMAT)))
+            params.append(('literal.updated_at',
+                           bill['updated_at'].strftime(DT_FORMAT)))
+
+            # Tika will extract a 'title' field from our document that is
+            # usually useless, so we ignore it by fmapping it to a
+            # 'ignored_' field.
+            # We want to store the actual bill title in a 'title' field
+            # but because of the fmap we can't just set literal.title
+            # Instead we set an 'ignored_bill_title' field and have a
+            # copyField in our solr schema to copy this to 'title'
+            params.append(('fmap.title', 'ignored_title'))
+            params.append((
+                'literal.ignored_bill_title',
+                bill['title'].encode('ascii', 'replace')))
+
+            # committing on each upload slows the process down dramatically
+            params.append(('commit', 'false'))
+
+            for type in bill.get('type', ['bill']):
+                params.append(('literal.type', type))
 
             url = "%supdate/extract?%s" % (solr_url, urllib.urlencode(params))
             req = urllib2.Request(url, {'file': doc})
