@@ -94,7 +94,7 @@
      <str name="echoParams">explicit</str>
      <float name="tie">0.01</float>
      <str name="qf">
-        text
+        text title bill_id state
      </str>
      <str name="fl">
        title,session,chamber,state,type,bill_id,created_at,updated_at
