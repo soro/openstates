@@ -3,8 +3,6 @@ import sys
 import logging
 import argparse
 
-from pymongo.son import SON
-
 import urllib
 import urllib2_file
 import urllib2
@@ -12,50 +10,48 @@ import urllib2
 from fiftystates.backend import db, fs
 from fiftystates.backend.utils import base_arg_parser
 
+import pysolr
 
 DT_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
-def index_versions(state, solr_url="http://localhost:8983/solr/"):
+def index_bills(state, solr_url="http://localhost:8983/solr/"):
     """
     Add the latest version of each bill for a given state to solr.
     """
+    solr = pysolr.Solr(solr_url)
+
     for bill in db.bills.find({'state': state}):
-        if bill['versions']:
+        doc = {}
+
+        for key in ('bill_id', 'state', 'chamber', 'session'):
+            doc[key] = bill[key]
+
+        doc['id'] = bill['_id']
+        doc['term'] = bill['_term']
+        doc['current_session'] = bill['_current_session']
+        doc['current_term'] = bill['_current_term']
+
+        # We store both string and date representations of created_at
+        # and updated_at because the date format we want to return via the
+        # api is not equivalent to solr's internal date format, but
+        # we don't want to have to convert each date value at request time.
+        doc['created_at'] = bill['created_at'].strftime(DT_FORMAT)
+        doc['updated_at'] = bill['updated_at'].strftime(DT_FORMAT)
+        doc['created_at_dt'] = bill['created_at'].isoformat() + "Z"
+        doc['updated_at_dt'] = bill['updated_at'].isoformat() + "Z"
+
+        if bill['versions'] and 'document_id' in bill['versions'][-1]:
             version = bill['versions'][-1]
 
-            if 'document_id' not in version:
-                continue
+            # Prepend 'literal.' for Solr Cell
+            params = [("literal.%s" % key, value)
+                      for (key, value) in doc.items()]
 
-            doc = fs.get(version['document_id'])
+            file = fs.get(version['document_id'])
 
-            params = []
-            params.append(('literal.bill_id', bill['bill_id']))
-            params.append(('literal.state', bill['state']))
-            params.append(('literal.chamber', bill['chamber']))
-            params.append(('literal.session', bill['session']))
-            params.append(('literal.term', bill['_term']))
-            params.append(('literal.current_session',
-                           bill['_current_session']))
-            params.append(('literal.current_term',
-                           bill['_current_term']))
-
-            params.append(('literal.document_name', doc.metadata['name']))
-            params.append(('literal.url', doc.metadata['url']))
-            params.append(('literal.id', version['document_id']))
-
-            # We store both string and date representations of created_at
-            # and updated_at because the date format we want to return via the
-            # api is not equivalent to solr's internal date format, but
-            # we don't want to have to convert each date value at request time.
-            params.append(('literal.created_at',
-                           bill['created_at'].strftime(DT_FORMAT)))
-            params.append(('literal.updated_at',
-                           bill['updated_at'].strftime(DT_FORMAT)))
-            params.append(('literal.created_at_dt',
-                           bill['created_at'].isoformat() + "Z"))
-            params.append(('literal.updated_at_dt',
-                           bill['updated_at'].isoformat() + "Z"))
+            params.append(('literal.document_name', file.metadata['name']))
+            params.append(('literal.url', file.metadata['url']))
 
             # Tika will extract a 'title' field from our document that is
             # usually useless, so we ignore it by fmapping it to a
@@ -69,15 +65,17 @@ def index_versions(state, solr_url="http://localhost:8983/solr/"):
                 'literal.ignored_bill_title',
                 bill['title'].encode('ascii', 'replace')))
 
-            # committing on each upload slows the process down dramatically
             params.append(('commit', 'false'))
 
             for type in bill.get('type', ['bill']):
                 params.append(('literal.type', type))
 
             url = "%supdate/extract?%s" % (solr_url, urllib.urlencode(params))
-            req = urllib2.Request(url, {'file': doc})
+            req = urllib2.Request(url, {'file': file})
             urllib2.urlopen(req)
+        else:
+            doc['type'] = bill.get('type', ['bill'])
+            solr.add([doc], commit=False)
 
 
 if __name__ == '__main__':
@@ -98,4 +96,4 @@ if __name__ == '__main__':
                                 args.state + " %(message)s"),
                         datefmt="%H:%M:%S")
 
-    index_versions(args.state, args.url)
+    index_bills(args.state, args.url)
