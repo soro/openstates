@@ -30,9 +30,10 @@ def index_versions(state, solr_url="http://localhost:8983/solr/"):
             doc = fs.get(version['document_id'])
 
             params = []
-            params.append(('literal.bill_id', doc.metadata['bill']['bill_id']))
-            params.append(('literal.state', doc.metadata['bill']['state']))
-            params.append(('literal.chamber', doc.metadata['bill']['chamber']))
+            params.append(('literal.bill_id', bill['bill_id']))
+            params.append(('literal.state', bill['state']))
+            params.append(('literal.chamber', bill['chamber']))
+            params.append(('literal.session', bill['session']))
 
             params.append(('literal.document_name', doc.metadata['name']))
             params.append(('literal.url', doc.metadata['url']))

@@ -184,6 +184,8 @@
           required="true" />
    <field name="chamber" type="string" indexed="true" stored="true"
           required="true" />
+   <field name="session" type="string" indexed="true" stored="true"
+          required="true" />
    <field name="bill_id" type="text" indexed="true" stored="true"
           required="true" />
    <field name="title" type="text" indexed="true" stored="true" />
