@@ -122,7 +122,7 @@ class BillSearchHandler(FiftyStateHandler):
         fq = " ".join(["+%s:%s" % (key, value)
                        for (key, value) in _filter.items()])
 
-        results = solr.search(request.GET.get('q', '*:*'), fq=fq)
+        results = solr.search(request.GET.get('q', ''), fq=fq, rows=100)
         return list(results)
 
 
