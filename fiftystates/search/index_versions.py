@@ -13,9 +13,14 @@ from fiftystates.backend import db, fs
 from fiftystates.backend.utils import base_arg_parser
 
 
-def import_versions(state, solr_url="http://localhost:8983/solr/"):
+def index_versions(state, solr_url="http://localhost:8983/solr/"):
+    """
+    Add the latest version of each bill for a given state to solr.
+    """
     for bill in db.bills.find({'state': state}):
-        for version in bill['versions']:
+        if bill['versions']:
+            version = bill['versions'][-1]
+
             if 'document_id' not in version:
                 continue
 
@@ -55,4 +60,4 @@ if __name__ == '__main__':
                                 args.state + " %(message)s"),
                         datefmt="%H:%M:%S")
 
-    import_versions(args.state, args.url)
+    index_versions(args.state, args.url)
