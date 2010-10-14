@@ -13,6 +13,9 @@ from fiftystates.backend import db, fs
 from fiftystates.backend.utils import base_arg_parser
 
 
+DT_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
 def index_versions(state, solr_url="http://localhost:8983/solr/"):
     """
     Add the latest version of each bill for a given state to solr.
@@ -35,6 +38,10 @@ def index_versions(state, solr_url="http://localhost:8983/solr/"):
             params['literal.document_name'] = doc.metadata['name']
             params['literal.url'] = doc.metadata['url']
             params['literal.id'] = version['document_id']
+            params['literal.bill_created_at'] = bill['created_at'].strftime(
+                DT_FORMAT)
+            params['literal.bill_updated_at'] = bill['updated_at'].strftime(
+                DT_FORMAT)
             params['commit'] = 'false'
 
             url = "%supdate/extract?%s" % (solr_url, urllib.urlencode(params))

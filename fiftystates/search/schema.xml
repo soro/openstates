@@ -187,6 +187,8 @@
    <field name="bill_id" type="text" indexed="true" stored="true"
           required="true" />
    <field name="bill_title" type="text" indexed="true" stored="true" />
+   <field name="bill_created_at" type="text" indexed="false" stored="true" />
+   <field name="bill_updated_at" type="text" indexed="false" stored="true" />
 
    <!-- Version metadata -->
    <field name="url" type="text" indexed="true" stored="true" />
