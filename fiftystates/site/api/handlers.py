@@ -87,13 +87,14 @@ class BillSearchHandler(FiftyStateHandler):
         search_window = request.GET.get('search_window', '').lower()
         if search_window:
             if search_window == 'session':
-                _filter['current_session'] = True
+                _filter['current_session'] = 'true'
             elif search_window == 'term':
-                _filter['current_term'] = True
+                _filter['current_term'] = 'true'
             elif search_window.startswith('session:'):
-                _filter['session'] = search_window.split('session:')[1]
+                _filter['session'] = '"%s"' % search_window.split(
+                    'session:')[1]
             elif search_window.startswith('term:'):
-                _filter['term'] = search_window.split('term:')[1]
+                _filter['term'] = '"%s"' % search_window.split('term:')[1]
             elif search_window == 'all':
                 pass
             else:
