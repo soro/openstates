@@ -10,6 +10,8 @@ from django.http import HttpResponse
 from piston.utils import rc
 from piston.handler import BaseHandler, HandlerMetaClass
 
+import pysolr
+
 
 _chamber_aliases = {
     'assembly': 'lower',
@@ -17,22 +19,7 @@ _chamber_aliases = {
     'senate': 'upper',
     }
 
-
-def _build_mongo_filter(request, keys, icase=True):
-    # We use regex queries to get case insensitive search - this
-    # means they won't use any indexes for now. Real case insensitive
-    # queries are coming eventually:
-    # http://jira.mongodb.org/browse/SERVER-90
-    _filter = {}
-    for key in keys:
-        value = request.GET.get(key)
-        if value:
-            if key == 'chamber':
-                value = value.lower()
-                _filter[key] = _chamber_aliases.get(value, value)
-            else:
-                _filter[key] = re.compile('^%s$' % value, re.IGNORECASE)
-    return _filter
+solr = pysolr.Solr("http://localhost:8983/solr/")
 
 
 class FiftyStateHandlerMetaClass(HandlerMetaClass):
@@ -88,31 +75,25 @@ class BillHandler(FiftyStateHandler):
 
 class BillSearchHandler(FiftyStateHandler):
     def read(self, request):
+        _filter = {}
 
-        bill_fields = {'title': 1, 'created_at': 1, 'updated_at': 1,
-                       'bill_id': 1, 'type': 1, 'state': 1,
-                       'session': 1, 'chamber': 1}
-
-        # normal mongo search logic
-        _filter = _build_mongo_filter(request, ('state', 'chamber'))
-
-        # process full-text query
-        query = request.GET.get('q')
-        if query:
-            keywords = list(keywordize(query))
-            _filter['_keywords'] = {'$all': keywords}
+        for key in ('state', 'chamber'):
+            try:
+                _filter[key] = request.GET[key]
+            except KeyError:
+                pass
 
         # process search_window
         search_window = request.GET.get('search_window', '').lower()
         if search_window:
             if search_window == 'session':
-                _filter['_current_session'] = True
+                _filter['current_session'] = True
             elif search_window == 'term':
-                _filter['_current_term'] = True
+                _filter['current_term'] = True
             elif search_window.startswith('session:'):
                 _filter['session'] = search_window.split('session:')[1]
             elif search_window.startswith('term:'):
-                _filter['_term'] = search_window.split('term:')[1]
+                _filter['term'] = search_window.split('term:')[1]
             elif search_window == 'all':
                 pass
             else:
@@ -125,19 +106,23 @@ class BillSearchHandler(FiftyStateHandler):
         since = request.GET.get('updated_since')
         if since:
             try:
-                _filter['since'] = datetime.datetime.strptime(since,
-                                                          "%Y-%m-%d %H:%M")
+                since = datetime.datetime.strptime(since, "%Y-%m-%d %H:%M")
             except ValueError:
                 try:
-                    _filter['since'] = datetime.datetime.strptime(since,
-                                                               "%Y-%m-%d")
+                    since = datetime.datetime.strptime(since, "%Y-%m-%d")
                 except ValueError:
                     resp = rc.BAD_REQUEST
                     resp.write(": invalid updated_since parameter."
                     " Please supply a date in YYYY-MM-DD format.")
                     return resp
 
-        return list(db.bills.find(_filter, bill_fields))
+            _filter['updated_at_dt'] = "[%sZ TO *]" % since.isoformat()
+
+        fq = " ".join(["+%s:%s" % (key, value)
+                       for (key, value) in _filter.items()])
+
+        results = solr.search(request.GET['q'], fq=fq)
+        return list(results)
 
 
 class LegislatorHandler(FiftyStateHandler):

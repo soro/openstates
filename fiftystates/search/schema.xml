@@ -189,11 +189,24 @@
    <field name="bill_id" type="text" indexed="true" stored="true"
           required="true" />
    <field name="title" type="text" indexed="true" stored="true" />
+
+   <!-- Because we want to return a different format date than solr
+        uses internally we store these as strings, but have separate
+        created_at_dt and updated_at_dt fields that we'll use for
+        sorting. -->
    <field name="created_at" type="string" indexed="false" stored="true" />
    <field name="updated_at" type="string" indexed="false" stored="true" />
+
    <field name="type" type="string" indexed="true" stored="true"
           multiValued="true" />
    <copyField source="ignored_bill_title" dest="title" />
+
+   <field name="current_session" type="boolean" indexed="true"
+          stored="true" required="true" />
+   <field name="current_term" type="boolean" indexed="true"
+          stored="true" required="true" />
+   <field name="term" type="string" indexed="true" stored="true"
+          required="true" />
 
    <!-- Version metadata -->
    <field name="url" type="text" indexed="true" stored="true" />

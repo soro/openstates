@@ -34,14 +34,28 @@ def index_versions(state, solr_url="http://localhost:8983/solr/"):
             params.append(('literal.state', bill['state']))
             params.append(('literal.chamber', bill['chamber']))
             params.append(('literal.session', bill['session']))
+            params.append(('literal.term', bill['_term']))
+            params.append(('literal.current_session',
+                           bill['_current_session']))
+            params.append(('literal.current_term',
+                           bill['_current_term']))
 
             params.append(('literal.document_name', doc.metadata['name']))
             params.append(('literal.url', doc.metadata['url']))
             params.append(('literal.id', version['document_id']))
+
+            # We store both string and date representations of created_at
+            # and updated_at because the date format we want to return via the
+            # api is not equivalent to solr's internal date format, but
+            # we don't want to have to convert each date value at request time.
             params.append(('literal.created_at',
                            bill['created_at'].strftime(DT_FORMAT)))
             params.append(('literal.updated_at',
                            bill['updated_at'].strftime(DT_FORMAT)))
+            params.append(('literal.created_at_dt',
+                           bill['created_at'].isoformat() + "Z"))
+            params.append(('literal.updated_at_dt',
+                           bill['updated_at'].isoformat() + "Z"))
 
             # Tika will extract a 'title' field from our document that is
             # usually useless, so we ignore it by fmapping it to a
