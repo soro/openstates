@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<config>
+  <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
+  <lib dir="../../contrib/extraction/lib" />
+  <lib dir="../../dist/" regex="apache-solr-cell-\d.*\.jar" />
+  <lib dir="../../dist/" regex="apache-solr-clustering-\d.*\.jar" />
+  <lib dir="../../contrib/clustering/lib/downloads/" />
+  <lib dir="../../contrib/clustering/lib/" />
+
+  <dataDir>${solr.data.dir:./solr/data}</dataDir>
+
+  <indexDefaults>
+    <useCompoundFile>false</useCompoundFile>
+    <mergeFactor>10</mergeFactor>
+    <ramBufferSizeMB>32</ramBufferSizeMB>
+    <maxFieldLength>10000</maxFieldLength>
+    <writeLockTimeout>1000</writeLockTimeout>
+    <commitLockTimeout>10000</commitLockTimeout>
+    <lockType>native</lockType>
+  </indexDefaults>
+
+  <mainIndex>
+    <useCompoundFile>false</useCompoundFile>
+    <ramBufferSizeMB>32</ramBufferSizeMB>
+    <mergeFactor>10</mergeFactor>
+    <unlockOnStartup>false</unlockOnStartup>
+    <reopenReaders>true</reopenReaders>
+
+    <deletionPolicy class="solr.SolrDeletionPolicy">
+      <str name="maxCommitsToKeep">1</str>
+      <str name="maxOptimizedCommitsToKeep">0</str>
+    </deletionPolicy>
+
+     <infoStream file="INFOSTREAM.txt">false</infoStream> 
+  </mainIndex>
+
+  <updateHandler class="solr.DirectUpdateHandler2" />
+  
+  <query>
+    <maxBooleanClauses>1024</maxBooleanClauses>
+
+    <filterCache
+      class="solr.FastLRUCache"
+      size="512"
+      initialSize="512"
+      autowarmCount="0"/>
+
+    <queryResultCache
+      class="solr.LRUCache"
+      size="512"
+      initialSize="512"
+      autowarmCount="0"/>
+
+    <documentCache
+      class="solr.LRUCache"
+      size="512"
+      initialSize="512"
+      autowarmCount="0"/>
+
+    <enableLazyFieldLoading>true</enableLazyFieldLoading>
+    <queryResultWindowSize>20</queryResultWindowSize>
+    <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+
+    <listener event="newSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+      </arr>
+    </listener>
+
+    <listener event="firstSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+      </arr>
+    </listener>
+
+    <useColdSearcher>false</useColdSearcher>
+    <maxWarmingSearchers>2</maxWarmingSearchers>
+  </query>
+
+  <requestDispatcher handleSelect="true" >
+    <requestParsers enableRemoteStreaming="true" multipartUploadLimitInKB="2048000" />
+
+    <httpCaching lastModifiedFrom="openTime"
+                 etagSeed="Solr" />
+  </requestDispatcher>
+
+  <requestHandler name="standard" class="solr.SearchHandler">
+     <lst name="defaults">
+       <str name="echoParams">explicit</str>
+     </lst>
+  </requestHandler>
+
+  <requestHandler name="dismax" class="solr.SearchHandler" default="true">
+    <lst name="defaults">
+     <str name="defType">dismax</str>
+     <str name="echoParams">explicit</str>
+     <float name="tie">0.01</float>
+     <str name="qf">
+        text
+     </str>
+     <str name="fl">
+       title,session,chamber,state,type,bill_id,created_at,updated_at
+     </str>
+     <int name="ps">100</int>
+     <str name="q.alt">*:*</str>
+    </lst>
+  </requestHandler>
+
+  <searchComponent name="spellcheck" class="solr.SpellCheckComponent">
+
+    <str name="queryAnalyzerFieldType">textSpell</str>
+
+    <lst name="spellchecker">
+      <str name="name">default</str>
+      <str name="field">name</str>
+      <str name="spellcheckIndexDir">./spellchecker</str>
+    </lst>
+  </searchComponent>
+
+  <!-- Solr Cell: http://wiki.apache.org/solr/ExtractingRequestHandler -->
+  <requestHandler name="/update/extract" class="org.apache.solr.handler.extraction.ExtractingRequestHandler" startup="lazy">
+    <lst name="defaults">
+      <str name="fmap.content">text</str>
+      <str name="lowernames">true</str>
+      <str name="uprefix">ignored_</str>
+      <str name="captureAttr">false</str>
+
+      <!-- Tika's title tends to be useless for the types of docs
+           we're indexing -->
+      <str name="fmap.title">ignored_title</str>
+    </lst>
+  </requestHandler>
+
+  <searchComponent name="termsComponent" class="org.apache.solr.handler.component.TermsComponent"/>
+
+  <requestHandler name="/terms" class="org.apache.solr.handler.component.SearchHandler">
+     <lst name="defaults">
+      <bool name="terms">true</bool>
+    </lst>     
+    <arr name="components">
+      <str>termsComponent</str>
+    </arr>
+  </requestHandler>
+
+  <requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />
+
+
+  <requestHandler name="/update/javabin" class="solr.BinaryUpdateRequestHandler" />
+
+  <requestHandler name="/analysis/document" class="solr.DocumentAnalysisRequestHandler" />
+
+  <requestHandler name="/analysis/field" class="solr.FieldAnalysisRequestHandler" />
+
+  <requestHandler name="/update/csv" class="solr.CSVRequestHandler" startup="lazy" />
+
+
+  <requestHandler name="/admin/" class="org.apache.solr.handler.admin.AdminHandlers" />
+
+  <requestHandler name="/admin/ping" class="PingRequestHandler">
+    <lst name="defaults">
+      <str name="qt">standard</str>
+      <str name="q">solrpingquery</str>
+      <str name="echoParams">all</str>
+    </lst>
+  </requestHandler>
+
+  <!-- Echo the request contents back to the client -->
+  <requestHandler name="/debug/dump" class="solr.DumpRequestHandler" >
+    <lst name="defaults">
+     <str name="echoParams">explicit</str> <!-- for all params (including the default etc) use: 'all' -->
+     <str name="echoHandler">true</str>
+    </lst>
+  </requestHandler>
+
+  <highlighting>
+   <fragmenter name="gap" class="org.apache.solr.highlight.GapFragmenter" default="true">
+    <lst name="defaults">
+     <int name="hl.fragsize">100</int>
+    </lst>
+   </fragmenter>
+
+   <!-- A regular-expression-based fragmenter (f.i., for sentence extraction) -->
+   <fragmenter name="regex" class="org.apache.solr.highlight.RegexFragmenter">
+    <lst name="defaults">
+      <!-- slightly smaller fragsizes work better because of slop -->
+      <int name="hl.fragsize">70</int>
+      <!-- allow 50% slop on fragment sizes -->
+      <float name="hl.regex.slop">0.5</float>
+      <!-- a basic sentence pattern -->
+      <str name="hl.regex.pattern">[-\w ,/\n\"']{20,200}</str>
+    </lst>
+   </fragmenter>
+
+   <formatter name="html" class="org.apache.solr.highlight.HtmlFormatter" default="true">
+    <lst name="defaults">
+     <str name="hl.simple.pre"><![CDATA[<em>]]></str>
+     <str name="hl.simple.post"><![CDATA[</em>]]></str>
+    </lst>
+   </formatter>
+  </highlighting>
+
+  <admin>
+    <defaultQuery>solr</defaultQuery>
+  </admin>
+
+</config>
