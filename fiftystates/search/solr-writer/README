@@ -1,0 +1,8 @@
+A Solr QueryResponseWriter that outputs results in the Open State Project JSON response format.
+
+To build:
+
+  lein deps
+  lein jar
+
+Due to some annoyances around clojure and Solr's custom class loader the easiest way to use this is to copy the openstates-solr-writer.jar and everything in lib/ directly into Solr's WEB-INF/lib/ directory.
