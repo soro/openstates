@@ -7,6 +7,9 @@
   <lib dir="../../contrib/clustering/lib/downloads/" />
   <lib dir="../../contrib/clustering/lib/" />
 
+  <queryResponseWriter name="osjson"
+                       class="com.sunlightlabs.openstates.solr.JSONWriter" />
+
   <dataDir>${solr.data.dir:./solr/data}</dataDir>
 
   <indexDefaults>
