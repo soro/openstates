@@ -10,16 +10,13 @@ try:
 except:
     import simplejson as json
 
-from fiftystates import settings
 from fiftystates.backend import db
 from fiftystates.backend.names import get_legislator_id
-from fiftystates.backend.utils import (base_arg_parser, prepare_obj,
-                                       update, get_committee_id)
+from fiftystates.backend.utils import prepare_obj, update, get_committee_id
 from fiftystates.scrape.events import Event
 
 import pymongo
 from pymongo.son import SON
-import argparse
 
 
 def ensure_indexes():
@@ -94,7 +91,8 @@ def actions_to_events(state):
 
             description = "%s: %s" % (bill['bill_id'], action['action'])
             data = Event(bill['session'], action['date'],
-                              'bill:action', description)
+                         'bill:action', description,
+                         action_type=action['type'])
             data.add_participant('actor', action['actor'])
             data['_guid'] = guid
             data['state'] = state
@@ -105,21 +103,3 @@ def actions_to_events(state):
                 _insert_with_id(data)
             else:
                 update(event, data, db.events)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        parents=[base_arg_parser],
-        description='Import scraped events.')
-
-    parser.add_argument('--data_dir', '-d', type=str,
-                        help='the base Fifty State data directory')
-
-    args = parser.parse_args()
-
-    if args.data_dir:
-        data_dir = args.data_dir
-    else:
-        data_dir = settings.FIFTYSTATES_DATA_DIR
-
-    import_events(args.state, data_dir)

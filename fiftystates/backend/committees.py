@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import with_statement
 import os
-import re
 import sys
 import glob
 import datetime
@@ -11,13 +10,10 @@ try:
 except:
     import simplejson as json
 
-from fiftystates import settings
 from fiftystates.backend import db
-from fiftystates.backend.utils import (base_arg_parser, prepare_obj, update,
-                                       insert_with_id)
+from fiftystates.backend.utils import prepare_obj, update, insert_with_id
 
 import pymongo
-import argparse
 import name_tools
 
 
@@ -58,6 +54,7 @@ def import_committees(state, data_dir):
                         committee = spec
                         committee['_type'] = 'committee'
                         committee['members'] = []
+                        committee['sources'] = []
                         insert_with_id(committee)
 
                     for member in committee['members']:
@@ -139,6 +136,8 @@ def import_committees(state, data_dir):
 
         db.committees.save(committee, safe=True)
 
+    print 'imported %s committee files' % len(paths)
+
     link_parents(state)
 
     ensure_indexes()
@@ -160,22 +159,3 @@ def link_parents(state):
                 comm['parent_id'] = parent['_id']
 
         db.committees.save(comm)
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        parents=[base_arg_parser],
-        description=('Import scraped (separate file) comittees into a '
-                     'mongo database.'))
-
-    parser.add_argument('--data_dir', '-d', type=str,
-                        help='the base Fifty State data directory')
-
-    args = parser.parse_args()
-
-    if args.data_dir:
-        data_dir = args.data_dir
-    else:
-        data_dir = settings.FIFTYSTATES_DATA_DIR
-
-    import_committees(args.state, data_dir)

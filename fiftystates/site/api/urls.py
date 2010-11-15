@@ -1,17 +1,27 @@
 from django.conf import settings
 from django.conf.urls.defaults import *
+from django.http import HttpResponse
 
 import piston.resource
 from piston.emitters import Emitter
 
 from fiftystates.site.api.handlers import *
-from fiftystates.site.api.views import document
+from fiftystates.site.api.views import document, legislator_preview
 from fiftystates.site.api.models import LogEntry
 from fiftystates.site.api.emitters import OpenStateJSONEmitter
+from fiftystates.site.api.emitters import FeedEmitter, ICalendarEmitter
 
 if getattr(settings, 'USE_LOCKSMITH', False):
     from locksmith.auth.authentication import PistonKeyAuthentication
-    authorizer = PistonKeyAuthentication()
+
+    class Authorizer(PistonKeyAuthentication):
+        def challenge(self):
+            resp = HttpResponse("Authorization Required: \n"
+        "obtain a key at http://services.sunlightlabs.com/accounts/register/")
+            resp.status_code = 401
+            return resp
+
+    authorizer = Authorizer()
 
     class Resource(piston.resource.Resource):
         def __call__(self, request, *args, **kwargs):
@@ -34,6 +44,9 @@ else:
 Emitter.register('json', OpenStateJSONEmitter,
                  'application/json; charset=utf-8')
 
+Emitter.register('rss', FeedEmitter, 'application/rss+xml')
+Emitter.register('ics', ICalendarEmitter, 'text/calendar')
+
 Emitter.unregister('xml')
 Emitter.unregister('yaml')
 Emitter.unregister('django')
@@ -51,6 +64,9 @@ committee_handler = Resource(CommitteeHandler, authentication=authorizer)
 committee_search_handler = Resource(CommitteeSearchHandler,
                                     authentication=authorizer)
 stats_handler = Resource(StatsHandler, authentication=authorizer)
+events_handler = Resource(EventsHandler, authentication=authorizer)
+reconciliation_handler = Resource(ReconciliationHandler,
+                                  authentication=authorizer)
 
 urlpatterns = patterns('',
     # v1 urls
@@ -71,6 +87,13 @@ urlpatterns = patterns('',
     url(r'^v1/committees/$', committee_search_handler),
 
     url(r'^v1/documents/(?P<id>[A-Z]{2,2}D\d{8,8})/$', document),
+
+    url(r'^v1/events/$', events_handler),
+    url(r'^v1/events/(?P<id>[A-Z]{2,2}E\d{8,8})/$', events_handler),
+
+    url(r'^v1/legislators/reconcile/$', reconciliation_handler),
+    url(r'^v1/legislators/preview/(?P<id>[A-Z]{2,2}L\d{6,6})/$',
+        legislator_preview),
 
     url(r'^v1/stats/$', stats_handler),
 )

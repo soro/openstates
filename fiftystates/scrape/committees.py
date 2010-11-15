@@ -11,6 +11,8 @@ from fiftystates.scrape import Scraper, FiftystatesObject, JSONDateEncoder
 
 class CommitteeScraper(Scraper):
 
+    scraper_type = 'committees'
+
     def _get_schema(self):
         schema_path = os.path.join(os.path.split(__file__)[0],
                                    '../../schemas/committee.json')
@@ -23,7 +25,7 @@ class CommitteeScraper(Scraper):
 
     def save_committee(self, committee):
         """
-        Save a scraped :class:`pyutils.legislation.Committee` object.
+        Save a scraped :class:`~fiftystates.scrape.committees.Committee` object.
         Only call after all data for the given committee has been collected.
         """
         name = committee['committee']
