@@ -1,0 +1,3 @@
+To start, from solr 'example' dir:
+
+   java -Dsolr.solr.home=path_to_openstates/fiftystates/search/home -jar solr.jar
