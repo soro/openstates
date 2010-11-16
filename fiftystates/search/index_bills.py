@@ -8,7 +8,6 @@ import urllib2_file
 import urllib2
 
 from fiftystates.backend import db, fs
-from fiftystates.backend.utils import base_arg_parser
 
 import pysolr
 
@@ -80,8 +79,10 @@ def index_bills(state, solr_url="http://localhost:8983/solr/"):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        parents=[base_arg_parser],
         description="Download and store copies of bill versions.")
+    parser.add_argument('state', type=str,
+                        help=('the two-letter abbreviation of the '
+                              'state to index'))
     parser.add_argument('-u', '--url', type=str, dest='url',
                         default='http://localhost:8983/solr/',
                         help='the solr instance URL')
