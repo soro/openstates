@@ -14,7 +14,7 @@ import pysolr
 DT_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
-def index_bills(state, solr_url="http://localhost:8983/solr/"):
+def index_bills(state, solr_url="http://localhost:8983/solr/bills"):
     """
     Add the latest version of each bill for a given state to solr.
     """
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                         help=('the two-letter abbreviation of the '
                               'state to index'))
     parser.add_argument('-u', '--url', type=str, dest='url',
-                        default='http://localhost:8983/solr/',
+                        default='http://localhost:8983/solr/bills/',
                         help='the solr instance URL')
 
     args = parser.parse_args()
