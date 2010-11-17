@@ -30,7 +30,7 @@ def index_bills(state, solr_url="http://localhost:8983/solr/bills"):
         doc['term'] = bill['_term']
         doc['current_session'] = bill['_current_session']
         doc['current_term'] = bill['_current_term']
-        doc['bill_title'] = bill['title'].encode('ascii', 'replace')
+        doc['ignored_bill_title'] = bill['title'].encode('ascii', 'replace')
 
         # We store both string and date representations of created_at
         # and updated_at because the date format we want to return via the
