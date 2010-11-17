@@ -30,6 +30,7 @@ def index_bills(state, solr_url="http://localhost:8983/solr/bills"):
         doc['term'] = bill['_term']
         doc['current_session'] = bill['_current_session']
         doc['current_term'] = bill['_current_term']
+        doc['bill_title'] = bill['title'].encode('ascii', 'replace')
 
         # We store both string and date representations of created_at
         # and updated_at because the date format we want to return via the
@@ -60,9 +61,6 @@ def index_bills(state, solr_url="http://localhost:8983/solr/bills"):
             # Instead we set an 'ignored_bill_title' field and have a
             # copyField in our solr schema to copy this to 'title'
             params.append(('fmap.title', 'ignored_title'))
-            params.append((
-                'literal.ignored_bill_title',
-                bill['title'].encode('ascii', 'replace')))
 
             params.append(('commit', 'false'))
 
