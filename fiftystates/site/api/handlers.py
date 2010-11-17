@@ -27,7 +27,7 @@ _chamber_aliases = {
     'senate': 'upper',
     }
 
-solr = pysolr.Solr("http://localhost:8983/solr/")
+bill_solr = pysolr.Solr("http://localhost:8983/solr/bills")
 
 
 class FiftyStateHandlerMetaClass(HandlerMetaClass):
@@ -130,7 +130,7 @@ class BillSearchHandler(FiftyStateHandler):
         fq = " ".join(["+%s:%s" % (key, value)
                        for (key, value) in _filter.items()])
 
-        results = solr.search(request.GET.get('q', ''), fq=fq, rows=100)
+        results = bill_solr.search(request.GET.get('q', ''), fq=fq, rows=100)
         return list(results)
 
 
