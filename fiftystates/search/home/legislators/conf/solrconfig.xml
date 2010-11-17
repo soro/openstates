@@ -100,7 +100,7 @@
        full_name first_name
      </str>
      <str name="fl">
-       full_name,first_name,last_name,middle_name,suffixes,chamber,district,party,votesmart_id,nimsp_candidate_id,created_at,updated_at,id,leg_id,active
+       full_name,first_name,last_name,middle_name,suffixes,state,chamber,district,party,votesmart_id,nimsp_candidate_id,created_at,updated_at,id,leg_id,active
      </str>
      <int name="ps">100</int>
      <str name="q.alt">*:*</str>

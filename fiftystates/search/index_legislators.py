@@ -20,7 +20,7 @@ def index_legislators(state,
         doc = {}
 
         for key in ('leg_id', 'full_name', 'first_name', 'last_name',
-                    'middle_name', 'suffixes', 'chamber', 'district',
+                    'middle_name', 'suffixes', 'chamber', 'state', 'district',
                     'party', 'votesmart_id', 'nimsp_candidate_id',
                     'active'):
             doc[key] = leg.get(key, '')

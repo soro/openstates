@@ -181,6 +181,7 @@
    <field name="last_name" type="text" indexed="true" stored="true" />
    <field name="middle_name" type="text" indexed="true" stored="true" />
    <field name="suffixes" type="text" indexed="true" stored="true" />
+   <field name="state" type="string" indexed="true" stored="true" />
    <field name="chamber" type="string" indexed="true" stored="true" />
    <field name="district" type="string" indexed="true" stored="true" />
    <field name="party" type="string" indexed="true" stored="true" />
