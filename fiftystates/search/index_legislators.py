@@ -13,7 +13,7 @@ DT_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 def index_legislators(state,
-                      solr_url="http://localhost:89083/solr/legislators"):
+                      solr_url="http://localhost:8983/solr/legislators"):
     solr = pysolr.Solr(solr_url)
 
     for leg in db.legislators.find({'roles.state': state}):
