@@ -89,12 +89,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    verbosity = {0: logging.WARNING,
-                 1: logging.INFO}.get(args.verbose, logging.DEBUG)
-
-    logging.basicConfig(level=verbosity,
-                        format=("%(asctime)s %(name)s %(levelname)s " +
-                                args.state + " %(message)s"),
-                        datefmt="%H:%M:%S")
-
     index_bills(args.state, args.url)
