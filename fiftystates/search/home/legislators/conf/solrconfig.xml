@@ -3,12 +3,6 @@
   <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
   <lib dir="../../contrib/extraction/lib" />
   <lib dir="../../dist/" regex="apache-solr-cell-\d.*\.jar" />
-  <lib dir="../../dist/" regex="apache-solr-clustering-\d.*\.jar" />
-  <lib dir="../../contrib/clustering/lib/downloads/" />
-  <lib dir="../../contrib/clustering/lib/" />
-
-  <queryResponseWriter name="osjson"
-                       class="com.sunlightlabs.openstates.solr.JSONWriter" />
 
   <dataDir>${solr.data.dir:./solr/legislator-data}</dataDir>
 
