@@ -1,3 +1,5 @@
 To start, from solr 'example' dir:
 
    java -Dsolr.solr.home=path_to_openstates/fiftystates/search/home -jar solr.jar
+
+You may need to edit the 'lib' dirs in home/bills/conf/solrconfig.xml and home/legislators/conf/solrconfig.xml to point to your solr directory.
