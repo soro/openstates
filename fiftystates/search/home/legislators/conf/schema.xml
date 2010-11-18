@@ -110,6 +110,18 @@
       </analyzer>
     </fieldType>
 
+    <fieldType name="ngram" class="solr.TextField">
+      <analyzer type="index">
+        <tokenizer class="solr.NGramTokenizerFactory" minGramSize="3"
+                   maxGramSize="15" />
+        <filter class="solr.LowerCaseFilterFactory" />
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory" />
+        <filter class="solr.LowerCaseFilterFactory" />
+      </analyzer>
+    </fieldType>
+
     <!-- Less flexible matching, but less false matches.  Probably not ideal for product names,
          but may be good for SKUs.  Can insert dashes in the wrong place and still match. -->
     <fieldType name="textTight" class="solr.TextField" positionIncrementGap="100" >
@@ -187,6 +199,9 @@
    <field name="party" type="string" indexed="true" stored="true" />
    <field name="votesmart_id" type="string" indexed="true" stored="true" />
    <field name="nimsp_candidate_id" type="string" indexed="true" stored="true" />
+
+   <field name="ngram_name" type="ngram" indexed="true" stored="false" />
+   <copyField source="full_name" dest="ngram_name" />
    
    <field name="leg_id" type="string" indexed="true" stored="true"
           required="true" />

@@ -91,7 +91,7 @@
      <str name="echoParams">explicit</str>
      <float name="tie">0.01</float>
      <str name="qf">
-       full_name first_name
+       full_name first_name last_name middle_name suffixes district ngram_name
      </str>
      <str name="fl">
        full_name,first_name,last_name,middle_name,suffixes,state,chamber,district,party,votesmart_id,nimsp_candidate_id,created_at,updated_at,id,leg_id,active
