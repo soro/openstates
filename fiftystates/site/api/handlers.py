@@ -28,6 +28,7 @@ _chamber_aliases = {
     }
 
 bill_solr = pysolr.Solr("http://localhost:8983/solr/bills")
+leg_solr = pysolr.Solr("http://localhost:8983/solr/legislators")
 
 
 class FiftyStateHandlerMetaClass(HandlerMetaClass):
@@ -311,45 +312,30 @@ class ReconciliationHandler(BaseHandler):
         return self.metadata
 
     def results(self, query):
-        # Look for the query to be a substring of a legislator name
-        # (case-insensitive)
-        pattern = re.compile(".*%s.*" % query['query'],
-                             re.IGNORECASE)
-
-        spec = {'full_name': pattern}
+        _filter = {}
 
         for prop in query.get('properties', []):
-            # Allow filtering by state or chamber for now
             if prop['pid'] in ('state', 'chamber'):
-                spec[prop['pid']] = prop['v']
+                _filter[prop['pid']] = prop['v']
 
-        legislators = db.legislators.find(spec)
+        fq = " ".join(["+%s:%s" % (key, value)
+                       for (key, value) in _filter.items()])
+
+        legislators = list(leg_solr.search(query['query'], fq=fq, rows=100,
+                                           fl="leg_id,full_name,score"))
+
+        if len(legislators) == 1:
+            match = True
+        else:
+            match = False
 
         results = []
         for leg in legislators:
-            if legislators.count() == 1:
-                match = True
-                score = 100
-            else:
-                match = False
-                if leg['last_name'] == query['query']:
-                    score = 90
-                else:
-                    distance = levenshtein_distance(leg['full_name'].lower(),
-                                                    query['query'].lower())
-                    score = 100.0 / (1 + distance)
-
-            # Note: There's a bug in Refine that causes reconciliation
-            # scores to be overwritten if the same legislator is returned
-            # for multiple queries. see:
-            # http://code.google.com/p/google-refine/issues/detail?id=185
-
-            results.append({"id": leg['_id'],
+            results.append({"id": leg['leg_id'],
                             "name": leg['full_name'],
-                            "score": score,
+                            "score": leg['score'],
                             "match": match,
-                            "type": [
-                                {"id": "/openstates/legislator",
-                                 "name": "Legislator"}]})
+                            "type": [{"id": "/openstates/legislator",
+                                     "name": "Legislator"}]})
 
         return sorted(results, cmp=lambda l, r: cmp(r['score'], l['score']))
