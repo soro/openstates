@@ -1,4 +1,4 @@
-from billy.site.api import utils
+from billy.site.api import geo
 
 def test_district_from_census_name():
     tests = [
@@ -18,4 +18,4 @@ def test_district_from_census_name():
         (('ex', 'lower', 'Senate District 8B'), '8B')]
 
     for census, ours in tests:
-        assert utils.district_from_census_name(*census) == ours
+        assert geo.district_from_census_name(*census) == ours

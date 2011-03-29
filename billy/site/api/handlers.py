@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from billy import db
 from billy.conf import settings
 from billy.utils import keywordize
-from billy.site.api.utils import district_from_census_name
+from billy.site.api import geo
 
 import pymongo
 
@@ -401,7 +401,7 @@ class LegislatorGeoHandler(BillyHandler):
                        '/1.0/boundary-set/sldl/': 'lower'}[dist['set']]
             census_name = dist['name'][3:]
 
-            our_name = district_from_census_name(
+            our_name = geo.district_from_census_name(
                 state, chamber, census_name)
 
             filters.append({'state': state, 'district': our_name,
