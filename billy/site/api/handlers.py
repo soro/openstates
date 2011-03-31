@@ -426,4 +426,4 @@ class DistrictHandler(BillyHandler):
         return {"state": state,
                 "chamber": chamber,
                 "district": district,
-                "coordinates": resp["shape"]["coordinates"]}
+                "coordinates": resp["shape"]["coordinates"][0]0]}
