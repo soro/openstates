@@ -77,6 +77,8 @@ reconciliation_handler = Resource(handlers.ReconciliationHandler,
                                   authentication=authorizer)
 legislator_geo_handler = Resource(handlers.LegislatorGeoHandler,
                                       authentication=authorizer)
+district_handler = Resource(handlers.DistrictHandler,
+                            authentication=authorizer)
 
 urlpatterns = patterns('',
     # v1 urls
@@ -109,6 +111,8 @@ urlpatterns = patterns('',
         legislator_preview),
 
     url(r'v1/legislators/geo/$', legislator_geo_handler),
+
+    url(r'v1/district/(?P<state>[a-zA-Z]{2,2})/(?P<chamber>upper|lower)/(?P<district>.*)/', district_handler),
 
     url(r'^v1/stats/$', stats_handler),
 )

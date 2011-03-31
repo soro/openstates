@@ -411,3 +411,19 @@ class LegislatorGeoHandler(BillyHandler):
             return []
 
         return list(db.legislators.find({'$or': filters}))
+
+
+class DistrictHandler(BillyHandler):
+    base_url = getattr(settings, 'BOUNDARY_SERVICE_URL',
+                       'http://localhost:8001/1.0/')
+
+    def read(self, request, state, chamber, district):
+        slug = geo.district_slug(state, chamber, district)
+
+        url = "%sshape/%s/" % (self.base_url, slug)
+        resp = json.load(urllib2.urlopen(url))
+
+        return {"state": state,
+                "chamber": chamber,
+                "district": district,
+                "coordinates": resp["shape"]["coordinates"]}
