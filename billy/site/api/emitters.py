@@ -35,7 +35,7 @@ class OpenStateJSONEmitter(JSONEmitter):
     def render(self, request):
         cb = request.GET.get('callback', None)
         seria = json.dumps(self.construct(), cls=DateTimeAwareJSONEncoder,
-                           ensure_ascii=False, indent=4)
+                           ensure_ascii=False)
 
         if cb:
             return "%s(%s)" % (cb, seria)
