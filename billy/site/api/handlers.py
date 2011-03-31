@@ -421,7 +421,11 @@ class DistrictHandler(BillyHandler):
         slug = geo.district_slug(state, chamber, district)
 
         url = "%sshape/%s/" % (self.base_url, slug)
-        resp = json.load(urllib2.urlopen(url))
+
+        try:
+            resp = json.load(urllib2.urlopen(url))
+        except urllib2.HTTPError:
+            return rc.NOT_FOUND
 
         return {"state": state,
                 "chamber": chamber,
