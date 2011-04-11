@@ -163,5 +163,4 @@ class FLBillScraper(BillScraper):
             else:
                 vote.other(name)
 
-        vote.validate()
         bill.add_vote(vote)

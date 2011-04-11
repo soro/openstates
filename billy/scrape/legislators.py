@@ -2,19 +2,11 @@ import os
 import json
 
 from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape.utils import get_terms
 
 
 class LegislatorScraper(Scraper):
-
     scraper_type = 'legislators'
-
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/person.json')
-        schema = json.load(open(schema_path))
-        terms = [t['name'] for t in self.metadata['terms']]
-        schema['properties']['roles']['items']['properties']['term']['enum'] = terms
-        return schema
 
     def scrape(self, chamber, term):
         """
@@ -39,9 +31,12 @@ class LegislatorScraper(Scraper):
         self.log("save_person: %s" % person['full_name'])
 
         person['state'] = self.state
+        for role in person['roles']:
+            if 'state' not in role:
+                role['state'] = self.state
 
         # call validation
-        self.validate_json(person)
+        self.validate_object(person)
 
         role = person['roles'][0]
         filename = "%s_%s.json" % (role['term'],
@@ -63,9 +58,11 @@ class LegislatorScraper(Scraper):
 
         role = legislator['roles'][0]
         legislator['state'] = self.state
+        for role in legislator['roles']:
+            if 'state' not in role:
+                role['state'] = self.state
 
-        # call validation
-        self.validate_json(legislator)
+        self.validate_object(legislator)
 
         filename = "%s_%s_%s_%s.json" % (role['term'],
                                          role['chamber'],
@@ -78,6 +75,9 @@ class LegislatorScraper(Scraper):
 
 
 class Person(SourcedObject):
+    schema = json.load(open(os.path.join(os.path.split(__file__)[0],
+                                         '../schemas/person.json')))
+
     def __init__(self, full_name, first_name='', last_name='',
                  middle_name='', **kwargs):
         """
@@ -114,6 +114,15 @@ class Person(SourcedObject):
         self['roles'].append(dict(role=role, term=term,
                                   start_date=start_date,
                                   end_date=end_date, **kwargs))
+
+
+    def validate(self):
+        super(Person, self).validate()
+
+        for role in self['roles']:
+            if role['term'] not in get_terms(role['state']):
+                raise ValueError('invalid term for role: %s' % (
+                    role['term']))
 
 
 class Legislator(Person):

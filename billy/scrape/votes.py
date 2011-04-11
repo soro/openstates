@@ -3,22 +3,15 @@ import itertools
 import json
 
 from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape.utils import get_sessions
 
 
 class VoteScraper(Scraper):
-
     scraper_type = 'votes'
 
     def __init__(self, *args, **kwargs):
         super(VoteScraper, self).__init__(*args, **kwargs)
         self.sequence = itertools.count()
-
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/vote.json')
-        schema = json.load(open(schema_path))
-        schema['properties']['session']['enum'] = self.all_sessions()
-        return schema
 
     def scrape(self, chamber, session):
         """
@@ -46,13 +39,17 @@ class VoteScraper(Scraper):
                                                vote['bill_id'],
                                                vote['motion']))
 
-        self.validate_json(vote)
+        self.validate_object(vote)
 
         with open(os.path.join(self.output_dir, 'votes', filename), 'w') as f:
             json.dump(vote, f, cls=JSONDateEncoder)
 
 
 class Vote(SourcedObject):
+    standalone_schema = json.load(
+        open(os.path.join(os.path.split(__file__)[0],
+                          '../schemas/vote.json')))
+
     def __init__(self, chamber, date, motion, passed,
                  yes_count, no_count, other_count, type='other', **kwargs):
         """
@@ -118,10 +115,21 @@ class Vote(SourcedObject):
         """
         self['other_votes'].append(legislator)
 
-    def validate(self):
+    def validate(self, standalone=True):
+        super(Vote, self).validate()
+
+        if standalone:
+            self.validator.validate(self, self.standalone_schema)
+
+            if self['session'] not in get_sessions(self['state']):
+                raise ValueError("bad session: %s" % self['session'])
+
         if self['yes_votes'] or self['no_votes'] or self['other_votes']:
             # If we have *any* specific votes, then validate the counts
             # for all types.
-            assert len(self['yes_votes']) == self['yes_count']
-            assert len(self['no_votes']) == self['no_count']
-            assert len(self['other_votes']) == self['other_count']
+            if len(self['yes_votes']) != self['yes_count']:
+                raise ValueError("bad yes_vote count")
+            if len(self['no_votes']) != self['no_count']:
+                raise ValueError("bad no_vote count")
+            if len(self['other_votes']) != self['other_count']:
+                raise ValueError("bad other_vote count")

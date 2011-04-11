@@ -3,20 +3,11 @@ import uuid
 import json
 
 from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape.utils import get_sessions
 
 
 class EventScraper(Scraper):
-
     scraper_type = 'events'
-
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/event.json')
-
-        with open(schema_path) as f:
-            schema = json.load(f)
-
-        return schema
 
     def scrape(self, chamber, session):
         raise NotImplementedError("EventScrapers must define a scrape method")
@@ -28,7 +19,7 @@ class EventScraper(Scraper):
                                            event['type'],
                                            event['description']))
 
-        self.validate_json(event)
+        self.validate_object(event)
 
         filename = "%s.json" % str(uuid.uuid1())
         with open(os.path.join(self.output_dir, "events", filename), 'w') as f:
@@ -36,6 +27,9 @@ class EventScraper(Scraper):
 
 
 class Event(SourcedObject):
+    schema = json.load(open(os.path.join(os.path.split(__file__)[0],
+                                         '../schemas/event.json')))
+
     def __init__(self, session, when, type,
                  description, location, end=None, **kwargs):
         super(Event, self).__init__('event', **kwargs)
@@ -51,3 +45,9 @@ class Event(SourcedObject):
     def add_participant(self, type, participant, **kwargs):
         kwargs.update({'type': type, 'participant': participant})
         self['participants'].append(kwargs)
+
+    def validate(self):
+        super(Event, self).validate()
+
+        if self['session'] not in get_sessions(self['state']):
+            raise ValueError("bad session: %s" % self['session'])

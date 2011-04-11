@@ -2,18 +2,11 @@ import os
 import json
 
 from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
+from billy.scrape.utils import get_sessions
 
 
 class BillScraper(Scraper):
-
     scraper_type = 'bills'
-
-    def _get_schema(self):
-        schema_path = os.path.join(os.path.split(__file__)[0],
-                                   '../schemas/bill.json')
-        schema = json.load(open(schema_path))
-        schema['properties']['session']['enum'] = self.all_sessions()
-        return schema
 
     def scrape(self, chamber, session):
         """
@@ -36,7 +29,7 @@ class BillScraper(Scraper):
                                           bill['bill_id']))
 
         bill['state'] = self.state
-        self.validate_json(bill)
+        self.validate_object(bill)
 
         filename = "%s_%s_%s.json" % (bill['session'], bill['chamber'],
                                       bill['bill_id'])
@@ -52,6 +45,8 @@ class Bill(SourcedObject):
     See :class:`~billy.scrape.SourcedObject` for notes on
     extra attributes/fields.
     """
+    schema = json.load(open(os.path.join(os.path.split(__file__)[0],
+                                         '../schemas/bill.json')))
 
     def __init__(self, session, chamber, bill_id, title, **kwargs):
         """
@@ -164,3 +159,12 @@ class Bill(SourcedObject):
         Associate an alternate title with this bill.
         """
         self['alternate_titles'].append(title)
+
+    def validate(self, strict=True, sessions=None):
+        super(Bill, self).validate()
+
+        if self['session'] not in get_sessions(self['state']):
+            raise ValueError('bad session')
+
+        for vote in self['votes']:
+            vote.validate(standalone=False)

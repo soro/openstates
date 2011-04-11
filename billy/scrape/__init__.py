@@ -130,21 +130,13 @@ class Scraper(scrapelib.Scraper):
         self.debug = self.logger.debug
         self.warning = self.logger.warning
 
-    def validate_json(self, obj):
-        if not hasattr(self, '_schema'):
-            self._schema = self._get_schema()
+    def validate_object(self, obj):
         try:
-            self.validator.validate(obj, self._schema)
+            obj.validate()
         except ValueError as ve:
             self.warning(str(ve))
             if self.strict_validation:
                 raise ve
-
-    def all_sessions(self):
-        sessions = []
-        for t in self.metadata['terms']:
-            sessions.extend(t['sessions'])
-        return sessions
 
     def validate_session(self, session):
         """ Check that a session is present in the metadata dictionary.
@@ -193,6 +185,9 @@ class SourcedObject(dict):
     `SourcedObject` instance like a dictionary.
     """
 
+    validator = DatetimeValidator()
+    schema = None
+
     def __init__(self, _type, **kwargs):
         super(SourcedObject, self).__init__()
         self['_type'] = _type
@@ -207,6 +202,10 @@ class SourcedObject(dict):
         """
         retrieved = retrieved or datetime.datetime.utcnow()
         self['sources'].append(dict(url=url, retrieved=retrieved, **kwargs))
+
+    def validate(self):
+        if self.schema:
+            self.validator.validate(self, self.schema)
 
 
 def get_scraper(mod_path, state, scraper_type):
