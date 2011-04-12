@@ -1,5 +1,6 @@
 import os
 import json
+from operator import itemgetter
 
 from billy.scrape import Scraper, SourcedObject, JSONDateEncoder
 from billy.scrape.utils import get_sessions
@@ -165,6 +166,11 @@ class Bill(SourcedObject):
 
         if self['session'] not in get_sessions(self['state']):
             raise ValueError('bad session')
+
+        # Valid because sort is stable (sorry, Python <= 2.1)
+        actions = self['actions']
+        if actions != sorted(actions, key=itemgetter('date')):
+            raise ValueError("actions aren't in chronological order")
 
         for vote in self['votes']:
             vote.validate(standalone=False)
