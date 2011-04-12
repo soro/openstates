@@ -6,9 +6,6 @@ import logging
 from billy import db
 
 
-# metadata cache
-__metadata = {}
-
 # Adapted from NLTK's english stopwords
 stop_words = [
     'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves',
@@ -50,16 +47,24 @@ def keywordize(str):
                 word.lower() not in stop_words])
 
 
+def memoize(fun):
+    cache = {}
+    def new_fun(*args):
+        try:
+            return cache[args]
+        except KeyError:
+            value = fun(*args)
+            cache[args] = value
+            return value
+    return new_fun
+
+
+@memoize
 def metadata(state):
     """
     Grab the metadata for the given state (two-letter abbreviation).
     """
-    # This data should change very rarely and is queried very often so
-    # cache it here
-    state = state.lower()
-    if state in __metadata:
-        return __metadata[state]
-    return db.metadata.find_one({'_id': state})
+    return db.metadata.find_one({'_id': state.lower()})
 
 
 def chamber_name(state, chamber):

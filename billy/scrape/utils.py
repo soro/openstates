@@ -1,5 +1,7 @@
 import subprocess
 
+from billy.utils import memoize
+
 
 def convert_pdf(filename, type='xml'):
     commands = {'text': ['pdftotext', '-layout', filename, '-'],
@@ -18,12 +20,14 @@ def pdf_to_lxml(filename, type='html'):
     return lxml.html.fromstring(text)
 
 
+@memoize
 def get_metadata(state):
     metadata = __import__("openstates.%s" % state,
                           fromlist=['metadata']).metadata
     return metadata
 
 
+@memoize
 def get_sessions(state):
     metadata = get_metadata(state)
     sessions = []
@@ -32,6 +36,7 @@ def get_sessions(state):
     return sessions
 
 
+@memoize
 def get_terms(state):
     metadata = get_metadata(state)
     return [term['name'] for term in metadata['terms']]
