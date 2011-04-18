@@ -2,7 +2,7 @@ import time
 import logging
 import datetime
 import json
-from collections import defaultdict
+from collections import defaultdict, MutableMapping
 
 from billy.scrape.validator import DatetimeValidator
 
@@ -47,6 +47,8 @@ class JSONDateEncoder(json.JSONEncoder):
             return time.mktime(obj.utctimetuple())
         elif isinstance(obj, datetime.date):
             return time.mktime(obj.timetuple())
+        elif isinstance(obj, BillyObject):
+            return obj._dict
 
         return json.JSONEncoder.default(self, obj)
 
@@ -172,7 +174,50 @@ class Scraper(scrapelib.Scraper):
         raise NoDataForPeriod(term)
 
 
-class SourcedObject(dict):
+class BillyObject(MutableMapping):
+    validator = DatetimeValidator()
+    schema = None
+
+    def __init__(self, *args, **kwargs):
+        self._dict = {}
+
+        if args:
+            if isinstance(args[0], MutableMapping):
+                pairs = args[0].iteritems()
+            else:
+                pairs = iter(args[0])
+        elif kwargs:
+            pairs = kwargs.iteritems()
+        else:
+            pairs = []
+
+        for key, value in kwargs.iteritems():
+            self._dict[key] = value
+
+    def __getitem__(self, key):
+        return self._dict[key]
+
+    def __len__(self):
+        return len(self._dict)
+
+    def __iter__(self):
+        return iter(self._dict)
+
+    def __setitem__(self, key, value):
+        self._dict[key] = value
+
+    def __delitem__(self, key):
+        del self._dict[key]
+
+    def copy(self):
+        return self.__class__(**self._dict)
+
+    def validate(self):
+        if self.schema:
+            self.validator.validate(self, self.schema)
+
+
+class SourcedObject(BillyObject):
     """ Base object used for data storage.
 
     Base class for :class:`~billy.scrape.bills.Bill`,
@@ -184,10 +229,6 @@ class SourcedObject(dict):
     to add extra data beyond the required fields by assigning to the
     `SourcedObject` instance like a dictionary.
     """
-
-    validator = DatetimeValidator()
-    schema = None
-
     def __init__(self, _type, **kwargs):
         super(SourcedObject, self).__init__()
         self['_type'] = _type
@@ -202,10 +243,6 @@ class SourcedObject(dict):
         """
         retrieved = retrieved or datetime.datetime.utcnow()
         self['sources'].append(dict(url=url, retrieved=retrieved, **kwargs))
-
-    def validate(self):
-        if self.schema:
-            self.validator.validate(self, self.schema)
 
 
 def get_scraper(mod_path, state, scraper_type):
