@@ -28,8 +28,12 @@ Information Locations
 Legislators
 -----------
 house: http://leg.mt.gov/content/sessions/62nd/2011HouseMembers.txt
+
 senate: http://leg.mt.gov/content/sessions/62nd/2011SenateMembers.txt
+
+
 2011 only - last name, first name, party, district, address
+
 
 * term
 * chamber
@@ -43,10 +47,12 @@ senate: http://leg.mt.gov/content/sessions/62nd/2011SenateMembers.txt
 Committees (may be found as part of legislator info)
 ----------------------------------------------------
 2011 house committees: http://leg.mt.gov/css/House/house-committees-2011.asp  
-2011 senate committees: http://leg.mt.gov/css/Senate/senate%20committees-2011.asp
-#in-session committees only
 
-Missing Info
+2011 senate committees: http://leg.mt.gov/css/Senate/senate%20committees-2011.asp
+
+http://leg.mt.gov/css/Sessions/62nd/joint%20subcommittees.asp
+
+#in-session committees only
 
 * chamber
 * committee name
