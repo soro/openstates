@@ -3,15 +3,15 @@ STATE README TEMPLATE
 
 Metadata
 --------
-Name:  South Carolina
-Abbreviation:  SC
-Legislature Name:South Carolina Legislature  
-Upper Chamber Name:  Senate
-Lower Chamber Name:  House of Representatives
-Upper Chamber Title:  Senator
-Lower Chamber Title:  Representative
-Upper Chamber Term:  4 years
-Lower Chamber Term:  1 year
+Name:  South Carolina  
+Abbreviation:  SC  
+Legislature Name:South Carolina Legislature    
+Upper Chamber Name:  Senate  
+Lower Chamber Name:  House of Representatives  
+Upper Chamber Title:  Senator  
+Lower Chamber Title:  Representative  
+Upper Chamber Term:  4 years  
+Lower Chamber Term:  1 year  
 
 
 Information Locations
