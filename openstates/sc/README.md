@@ -5,13 +5,13 @@ Metadata
 --------
 Name:  South Carolina  
 Abbreviation:  SC  
-Legislature Name:South Carolina Legislature    
+Legislature Name:South Carolina General Assembly    
 Upper Chamber Name:  Senate  
 Lower Chamber Name:  House of Representatives  
 Upper Chamber Title:  Senator  
 Lower Chamber Title:  Representative  
 Upper Chamber Term:  4 years  
-Lower Chamber Term:  1 year  
+Lower Chamber Term:  2 years 
 
 
 Information Locations
