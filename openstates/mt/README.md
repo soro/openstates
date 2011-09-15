@@ -3,14 +3,22 @@ STATE README TEMPLATE
 
 Metadata
 --------
-Name: Montana 
+Name: Montana
+
 Abbreviation:  MT
+
 Legislature Name:  Montana Legislature
+
 Upper Chamber Name: Senate
+
 Lower Chamber Name:  House of Representatives
+
 Upper Chamber Title:  Senator
+
 Lower Chamber Title:  State Representative
+
 Upper Chamber Term:  4
+
 Lower Chamber Term:  2
 
 
