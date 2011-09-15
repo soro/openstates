@@ -28,7 +28,9 @@ Information Locations
 Sessions
 --------
 90 day session every odd numbered year
+
 * list of sessions: http://leg.mt.gov/css/Sessions/default.asp
+
 * session names (numerical, 2011=62 session, 2009=61st session)
 
 Legislators
