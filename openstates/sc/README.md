@@ -20,6 +20,7 @@ Information Locations
 Legislators
 -----------
 Missing Info
+
 * term
 * chamber
 * district
@@ -32,6 +33,7 @@ Missing Info
 Committees (may be found as part of legislator info)
 ----------------------------------------------------
 Missing Info
+
 * chamber
 * committee name
 * subcommittee name (optional)
@@ -40,6 +42,7 @@ Missing Info
 Bills
 -----
 Missing Info
+
 * session
 * chamber
 * bill id
@@ -53,6 +56,7 @@ Missing Info
 Votes (may be found as part of bill info)
 -----------------------------------------
 Missing Info
+
 * chamber
 * date
 * passed
