@@ -52,7 +52,7 @@ Committees (may be found as part of legislator info)
 
 http://leg.mt.gov/css/Sessions/62nd/joint%20subcommittees.asp
 
-#in-session committees only
+Note: in-session committees only
 
 * chamber
 * committee name
@@ -61,15 +61,18 @@ http://leg.mt.gov/css/Sessions/62nd/joint%20subcommittees.asp
 
 Bills
 -----
-Missing Info
+http://laws.leg.mt.gov/laws11/LAW0217W$BAIV.return_all_bills
+Note: all introducted and unintroduced bills from the 2011 session.
 
 * session
-* chamber
+* chamber (from type)
 * bill id
 * title
 * sponsors/authors
 * type (optional, e.g. 'house bill', 'senate resolution')
 * actions (optional, e.g. Introduced, Amended, Signed by Governor)
+
+Missing Info
 * versions (optional)
 * documents/sources (optional)
 
