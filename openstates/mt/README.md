@@ -86,7 +86,10 @@ Missing Info
 
 Votes (may be found as part of bill info)
 -----------------------------------------
-Missing Info
+http://laws.leg.mt.gov/laws11/LAW0217W$BAIV.return_all_bills
+
+Each bill links to a page with voting information
+
 
 * chamber
 * date
