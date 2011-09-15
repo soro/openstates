@@ -25,6 +25,13 @@ Lower Chamber Term:  2
 Information Locations
 =====================
 
+Sessions
+--------
+Missing Info
+
+* list of sessions
+* session names
+
 Legislators
 -----------
 house: http://leg.mt.gov/content/sessions/62nd/2011HouseMembers.txt
