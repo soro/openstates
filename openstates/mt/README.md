@@ -78,7 +78,7 @@ Note: all introducted and unintroduced bills from the 2011 session.
 * title
 * sponsors/authors
 * type (optional, e.g. 'house bill', 'senate resolution')
-* actions (optional, e.g. Introduced, Amended, Signed by Governor)
+* actions (optional, e.g. Introduced, Amended, Signed by Governor) - We assume that the 'Chapter Number Assigned' action is done by clerks
 
 Missing Info
 * versions (optional)
