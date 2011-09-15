@@ -48,6 +48,11 @@ Missing Info
 
 Bills
 -----
+2011 - House: http://www.leg.state.co.us/CLICS/CLICS2011A/csl.nsf/BillFoldersHouse?openFrameset
+2011 - Senate: http://www.leg.state.co.us/CLICS/CLICS2011A/csl.nsf/BillFoldersSenate?openFrameset
+
+
+
 Missing Info
 
 * session
