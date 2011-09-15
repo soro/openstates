@@ -4,13 +4,21 @@ STATE README TEMPLATE
 Metadata
 --------
 Name:  Colorado
+
 Abbreviation:  CO
-Legislature Name: Colorado General Assembly  
+
+Legislature Name: Colorado General Assembly 
+
 Upper Chamber Name:  Senate
+
 Lower Chamber Name:  House of Representatives
+
 Upper Chamber Title:  Senator
+
 Lower Chamber Title:  Representative
+
 Upper Chamber Term:  4
+
 Lower Chamber Term:  2
 
 
@@ -39,6 +47,8 @@ Missing Info
 
 Committees (may be found as part of legislator info)
 ----------------------------------------------------
+http://www.colorado.gov/cs/Satellite/CGA-LegislativeCouncil/CLC/1245677985421
+
 Missing Info
 
 * chamber
