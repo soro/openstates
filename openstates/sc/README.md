@@ -19,6 +19,9 @@ Information Locations
 
 Legislators
 -----------
+lower chamber legislators url = 'http://www.scstatehouse.gov/html-pages/housemembers.html'
+upper chamber legislators url = 'http://www.scstatehouse.gov/html-pages/senatemembersd.html'
+
 Missing Info
 
 * term
