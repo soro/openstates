@@ -3,15 +3,15 @@ STATE README TEMPLATE
 
 Metadata
 --------
-Name:
-Abbreviation:
-Legislature Name:
-Upper Chamber Name:
-Lower Chamber Name:
-Upper Chamber Title:
-Lower Chamber Title:
-Upper Chamber Term:
-Lower Chamber Term:
+Name:  
+Abbreviation:  
+Legislature Name:  
+Upper Chamber Name:  
+Lower Chamber Name:  
+Upper Chamber Title:  
+Lower Chamber Title:  
+Upper Chamber Term:  
+Lower Chamber Term:  
 
 
 Information Locations
