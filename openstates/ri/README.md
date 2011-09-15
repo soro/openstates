@@ -3,15 +3,15 @@ Rhode Island
 
 Metadata
 --------
-Name: Rhode Island and Providence Plantations
-Abbreviation: RI
-Legislature Name: Rhode Island General Assembly
-Upper Chamber Name: Senate
-Lower Chamber Name: House of Representatives
-Upper Chamber Title: Senator
-Lower Chamber Title: Representative
-Upper Chamber Term: 2 years
-Lower Chamber Term: 2 years
+Name: Rhode Island and Providence Plantations  
+Abbreviation: RI  
+Legislature Name: Rhode Island General Assembly  
+Upper Chamber Name: Senate  
+Lower Chamber Name: House of Representatives  
+Upper Chamber Title: Senator  
+Lower Chamber Title: Representative  
+Upper Chamber Term: 2 years  
+Lower Chamber Term: 2 years  
 
 
 Information Locations
@@ -19,8 +19,8 @@ Information Locations
 
 Legislators
 -----------
-http://www.rilin.state.ri.us/Documents/Senators.xls
-http://www.rilin.state.ri.us/Documents/Representatives.xls
+http://www.rilin.state.ri.us/Documents/Senators.xls  
+http://www.rilin.state.ri.us/Documents/Representatives.xls  
 * term
 * chamber
 * district
@@ -29,11 +29,27 @@ http://www.rilin.state.ri.us/Documents/Representatives.xls
 
 Committees
 ----------
-http://www.rilin.state.ri.us/Sitemap.html
-http://www.rilin.state.ri.us/ComMembers/ComMemS.asp?ComChoiceS=SCHM (example for one committee)
+http://www.rilin.state.ri.us/Sitemap.html  
+http://www.rilin.state.ri.us/ComMembers/ComMemS.asp?ComChoiceS=SCHM (example for one committee)  
 * chamber
 * committee name
 * members & roles
+
+Bills
+-----
+http://www.rilin.state.ri.us/BillText11/HouseText11/HouseText11.html  
+http://www.rilin.state.ri.us/BillText11/SenateText11/SenateText11.html  
+http://www.rilin.state.ri.us/Journals11/HouseJournals11/Housejournals11.html  
+http://www.rilin.state.ri.us/Journals11/SenateJournals11/Senatejournals11.html  
+http://dirac.rilin.state.ri.us/billstatus/WebClass1.ASP?WCI=BillStatus&WCE=ifrmBillStatus&WCU
+(Note: a POST with a comma delimited list of bill numbers passed as the 'hListBills' form
+parameter to the following URL provides information on bills)  
+* session
+* chamber
+* bill id
+* title
+* type
+* sponsors and cosponsors
 
 - - -
 
@@ -44,11 +60,11 @@ legislators.py
 --------------
 Progress: finished
 
-Sources:
+Sources:  
 * http://www.rilin.state.ri.us/Documents/Senators.xls
 * http://www.rilin.state.ri.us/Documents/Representatives.xls
 
-Data scraped:
+Data scraped:  
 * term
 * chamber
 * district_name
@@ -66,10 +82,10 @@ committees.py
 -------------
 Progress: finished
 
-Sources:
+Sources:  
 * http://www.rilin.state.ri.us/Sitemap.html
 
-Data scraped:
+Data scraped:  
 * chamber
 * membernames
 * roles
@@ -82,7 +98,7 @@ bills.py
 --------
 Progress: some
 
-Sources:
+Sources:  
 * http://www.rilin.state.ri.us/BillText11/HouseText11/HouseText11.html
 * http://www.rilin.state.ri.us/BillText11/SenateText11/SenateText11.html
 * http://www.rilin.state.ri.us/Journals11/HouseJournals11/Housejournals11.html
